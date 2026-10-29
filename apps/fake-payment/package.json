@@ -1,0 +1,7 @@
+{
+  "name": "@ticketrush/fake-payment",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "node --env-file=../../.env src/server.mjs" }
+}
