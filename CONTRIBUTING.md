@@ -6,7 +6,9 @@ Préparer une tâche du [Kanban](docs/kanban.md), clarifier ses critères et val
 
 ## Branches et commits
 
-La branche cible sera `main`. Son existence et sa protection ne sont pas encore configurées.
+La branche cible est `main`, publiée sur le dépôt public [Mouad-El-Aouiz/TicketRush](https://github.com/Mouad-El-Aouiz/TicketRush).
+
+Une règle de protection exige une PR et la résolution des conversations avant fusion, y compris pour les administrateurs. Les push forcés et suppressions sont interdits. Aucune approbation externe n'est exigée pour ce projet individuel. Les checks CI deviendront obligatoires lorsqu'ils auront été configurés et vérifiés.
 
 Utiliser une branche par tâche : `docs/...`, `chore/...`, `feat/...` ou `fix/...`. Les branches créées par Codex utilisent le préfixe `codex/`, par exemple `codex/docs-project-foundation`.
 
@@ -22,7 +24,7 @@ Garder les changements cohérents et relire le diff avant de committer. Ne pas a
 
 ## Pull requests
 
-Une PR est obligatoire pour chaque tâche dès que le dépôt distant et une branche de base sont disponibles. Le premier commit de base nécessaire à l'ouverture des PR sera documenté séparément lors de l'initialisation.
+Une PR est obligatoire pour chaque tâche. Le commit initial `774abfd` (`chore: initialize TicketRush project foundation`) a établi la branche de base avant activation de la protection. Il contient le cadrage et les documents déjà validés ; les changements suivants passent par une branche et une PR.
 
 Utiliser le modèle de PR : contexte, changements, validations réellement effectuées et risques. Procéder à une revue même en travaillant seul. Ne pas présenter une auto-revue comme l'approbation d'un autre contributeur.
 
