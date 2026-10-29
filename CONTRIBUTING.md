@@ -10,7 +10,7 @@ La branche cible est `main`, publiée sur le dépôt public [Mouad-El-Aouiz/Tick
 
 Une règle de protection exige une PR et la résolution des conversations avant fusion, y compris pour les administrateurs. Les push forcés et suppressions sont interdits. Aucune approbation externe n'est exigée pour ce projet individuel. Les checks CI deviendront obligatoires lorsqu'ils auront été configurés et vérifiés.
 
-Utiliser une branche par tâche : `docs/...`, `chore/...`, `feat/...` ou `fix/...`. Les branches créées par Codex utilisent le préfixe `codex/`, par exemple `codex/docs-project-foundation`.
+Utiliser une branche par tâche : `docs/...`, `chore/...`, `feat/...` ou `fix/...`, par exemple `docs/git-setup`. Cette convention s'applique aussi aux branches créées par l'assistant ; ne pas ajouter de préfixe `codex/`.
 
 Utiliser Conventional Commits, avec un message en anglais :
 
