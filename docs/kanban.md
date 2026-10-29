@@ -20,15 +20,17 @@ Tableau local de suivi du projet. Les user stories du MVP sont décrites dans [u
 
 | Backlog | Ready | In progress | Review | Done |
 |---|---|---|---|---|
-| — | — | — | P0-08 — Docker Compose PostgreSQL et Redis | P0-01 — Cadrer le MVP |
-| | | | P0-09 — Vérifier le démarrage et documenter | P0-02 — Rédiger les 13 user stories |
+| — | — | — | P0-10 — Bilan et clôture de Phase 0 | P0-01 — Cadrer le MVP |
+| | | | | P0-02 — Rédiger les 13 user stories |
 | | | | | P0-03 — Préparer le Kanban |
 | | | | | P0-04 — ADR : choix de NestJS |
 | | | | | P0-05 — ADR : monolithe modulaire |
 | | | | | P0-06 — Structure du dépôt et README |
-| P0-10 — Bilan et clôture de Phase 0 | | | | P0-07 — Git, conventions et dépôt distant |
+| | | | | P0-07 — Git, conventions et dépôt distant |
+| | | | | P0-08 — Docker Compose PostgreSQL et Redis |
+| | | | | P0-09 — Vérifier le démarrage et documenter |
 
-Les tâches P0-01 à P0-06 sont validées et leurs livrables figurent dans le commit initial `774abfd`. P0-07 est validée et livrée par la [PR #1](https://github.com/Mouad-El-Aouiz/TicketRush/pull/1), fusionnée dans `main` au commit `dbb912e`. Les fichiers Compose et d'environnement ont été validés progressivement ; les tests de démarrage, d'authentification et de persistance sont réalisés. P0-08 et P0-09 attendent la revue documentaire finale et leur livraison par PR. Les preuves figurent dans le [guide d'infrastructure locale](runbooks/local-infrastructure.md).
+Les tâches P0-01 à P0-06 sont validées et leurs livrables figurent dans le commit initial `774abfd`. P0-07 est livrée par la [PR #1](https://github.com/Mouad-El-Aouiz/TicketRush/pull/1), fusionnée au commit `dbb912e`. P0-08 et P0-09 sont validées et livrées par la [PR #2](https://github.com/Mouad-El-Aouiz/TicketRush/pull/2), fusionnée au commit `821ea4b`. Les preuves d'infrastructure figurent dans le [guide local](runbooks/local-infrastructure.md). Le [bilan de Phase 0](phase-0-review.md) est en revue : P0-10 n'est pas encore terminée et aucun tag n'est créé.
 
 ## Tâches de Phase 0
 
