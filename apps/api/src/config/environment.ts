@@ -15,6 +15,7 @@ const schema = z.object({
   JWT_SECRET: z.string().min(48),
   PAYMENT_SECRET: z.string().min(48),
   WEB_ORIGIN: z.url().default('http://localhost:3001'),
+  PAYMENT_PROVIDER_URL: z.url().default('http://127.0.0.1:4000'),
   REDIS_PASSWORD: z.string().min(1),
   REDIS_HOST: z.string().default('127.0.0.1'),
   REDIS_PORT: z.coerce.number().int().positive().default(6379),

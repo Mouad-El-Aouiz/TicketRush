@@ -83,6 +83,12 @@ export class EventsService {
     return event;
   }
   async lockCategory(tx: Prisma.TransactionClient, categoryId: string) {
+    const ref = await tx.category.findUnique({
+      where: { id: categoryId },
+      select: { eventId: true },
+    });
+    if (!ref) throw new NotFoundException('Category not found');
+    await tx.$queryRaw`SELECT id FROM events WHERE id = ${ref.eventId}::uuid FOR UPDATE`;
     await tx.$queryRaw`SELECT id FROM categories WHERE id = ${categoryId}::uuid FOR UPDATE`;
     const category = await tx.category.findUnique({
       where: { id: categoryId },
