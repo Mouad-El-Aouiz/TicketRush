@@ -1,6 +1,6 @@
 # Bilan de Phase 0 — Fondations de TicketRush
 
-Statut : bilan proposé, en attente de revue et de validation de clôture. La Phase 1 n'est pas commencée. Le tag proposé n'est pas encore créé.
+Statut : bilan validé et livré par la PR #3, fusionnée au commit `7fa9fd5`. Le tag annoté `v0.0-foundation` a été publié sur ce commit après validation. Les mentions d'attente ci-dessous décrivent la préparation historique de cette clôture.
 
 ## Ce qui a été construit
 

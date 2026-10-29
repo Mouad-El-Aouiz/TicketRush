@@ -20,7 +20,7 @@ Tableau local de suivi du projet. Les user stories du MVP sont décrites dans [u
 
 | Backlog | Ready | In progress | Review | Done |
 |---|---|---|---|---|
-| — | — | — | P0-10 — Bilan et clôture de Phase 0 | P0-01 — Cadrer le MVP |
+| — | — | P1-01 — Socle API, vérifié et à livrer par PR | — | P0-01 — Cadrer le MVP |
 | | | | | P0-02 — Rédiger les 13 user stories |
 | | | | | P0-03 — Préparer le Kanban |
 | | | | | P0-04 — ADR : choix de NestJS |
@@ -29,8 +29,11 @@ Tableau local de suivi du projet. Les user stories du MVP sont décrites dans [u
 | | | | | P0-07 — Git, conventions et dépôt distant |
 | | | | | P0-08 — Docker Compose PostgreSQL et Redis |
 | | | | | P0-09 — Vérifier le démarrage et documenter |
+| | | | | P0-10 — Bilan et clôture de Phase 0 |
 
-Les tâches P0-01 à P0-06 sont validées et leurs livrables figurent dans le commit initial `774abfd`. P0-07 est livrée par la [PR #1](https://github.com/Mouad-El-Aouiz/TicketRush/pull/1), fusionnée au commit `dbb912e`. P0-08 et P0-09 sont validées et livrées par la [PR #2](https://github.com/Mouad-El-Aouiz/TicketRush/pull/2), fusionnée au commit `821ea4b`. Les preuves d'infrastructure figurent dans le [guide local](runbooks/local-infrastructure.md). Le [bilan de Phase 0](phase-0-review.md) est en revue : P0-10 n'est pas encore terminée et aucun tag n'est créé.
+Mise à jour : P0-10 est validée, livrée par la PR #3 et le tag `v0.0-foundation` sur `7fa9fd5`. P1-01 couvre le workspace pnpm, l'API ESM stricte, ESLint/Prettier, les premiers tests et le démarrage vérifié. Ses contrôles passent ; sa livraison par PR reste à effectuer après le commit demandé. L'utilisateur a autorisé de terminer cette étape jusqu'au commit sans validations intermédiaires.
+
+Les tâches P0-01 à P0-06 sont validées et leurs livrables figurent dans le commit initial `774abfd`. P0-07 est livrée par la [PR #1](https://github.com/Mouad-El-Aouiz/TicketRush/pull/1), fusionnée au commit `dbb912e`. P0-08 et P0-09 sont validées et livrées par la [PR #2](https://github.com/Mouad-El-Aouiz/TicketRush/pull/2), fusionnée au commit `821ea4b`. Les preuves d'infrastructure figurent dans le [guide local](runbooks/local-infrastructure.md). Le [bilan de Phase 0](phase-0-review.md) est validé et livré par la PR #3 ; P0-10 est terminée et le tag v0.0-foundation est publié.
 
 ## Tâches de Phase 0
 
@@ -62,7 +65,7 @@ Ces regroupements ne constituent pas des tâches prêtes à implémenter. Chaque
 ## Vérification de P0-03
 
 - Les cinq colonnes et leurs règles sont présentes.
-- Aucune tâche n'est actuellement dans In progress.
+- Limite conservée : une seule tâche dans In progress (P1-01).
 - Les dix tâches de Phase 0 ont un résultat attendu et des dépendances.
 - Les décisions ouvertes ne sont pas considérées comme résolues.
 - Le Kanban a été validé dans la conversation ; P0-03 est dans Done.
