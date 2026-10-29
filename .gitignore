@@ -13,3 +13,7 @@ coverage/
 .DS_Store
 Thumbs.db
 tmp/
+apps/api/src/generated/
+apps/api/storage/
+playwright-report/
+test-results/

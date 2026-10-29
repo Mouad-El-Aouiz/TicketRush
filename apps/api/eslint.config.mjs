@@ -5,7 +5,9 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-  { ignores: ['dist/**', 'coverage/**', 'node_modules/**'] },
+  {
+    ignores: ['dist/**', 'coverage/**', 'node_modules/**', 'src/generated/**'],
+  },
   {
     files: ['**/*.ts'],
     extends: [js.configs.recommended, tseslint.configs.recommendedTypeChecked],
@@ -26,6 +28,8 @@ export default defineConfig(
         expect: 'readonly',
         beforeEach: 'readonly',
         afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
       },
     },
   },
