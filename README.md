@@ -8,7 +8,7 @@ Le problème central : réserver et vendre un stock limité de places lors de de
 
 Phase 0 — cadrage et préparation du dépôt.
 
-Le cadrage, les 13 user stories, le Kanban et les deux premiers ADR ont été validés. L'arborescence et ce README sont en revue.
+Le cadrage, les 13 user stories, le Kanban, les deux premiers ADR, l'arborescence et le README initial ont été validés. Le [dépôt public GitHub](https://github.com/Mouad-El-Aouiz/TicketRush) est créé et `main` est protégée. La configuration Git et les conventions sont en revue ; Docker Compose reste à préparer.
 
 Aucune application, base de données ou infrastructure n'est encore configurée. Les dossiers d'applications sont des emplacements réservés. Il n'existe pas encore de commande de démarrage, de résultat de tests, de CI ou de déploiement à utiliser.
 
@@ -68,6 +68,7 @@ Le service éventuellement extrait en Phase 5 sera choisi et justifié par un AD
 
 - [User stories du MVP et critères d'acceptation](docs/user-stories.md)
 - [Kanban et tâches de Phase 0](docs/kanban.md)
+- [Conventions de contribution et protections Git](CONTRIBUTING.md)
 - [ADR 0001 — Choisir NestJS](docs/adr/0001-backend-framework.md)
 - [ADR 0002 — Commencer par un monolithe modulaire](docs/adr/0002-modular-monolith.md)
 
@@ -81,4 +82,4 @@ Pour les sujets de concurrence, performance et résilience, une version naïve p
 
 ## Prochaines étapes
 
-Après validation de la structure et du README : configurer Git et le dépôt distant, puis préparer PostgreSQL et Redis avec Docker Compose. Les prérequis et commandes de démarrage seront ajoutés après vérification réelle du fonctionnement.
+Après revue de la configuration Git : préparer PostgreSQL et Redis avec Docker Compose. Les prérequis et commandes de démarrage seront ajoutés après vérification réelle du fonctionnement.
