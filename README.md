@@ -8,7 +8,7 @@ Le problème central : réserver et vendre un stock limité de places lors de de
 
 Phase 0 — cadrage et préparation du dépôt.
 
-Le cadrage, les 13 user stories, le Kanban, les deux premiers ADR, l'arborescence et le README initial ont été validés. Le [dépôt public GitHub](https://github.com/Mouad-El-Aouiz/TicketRush) est créé et `main` est protégée. La configuration Git est validée et livrée par la PR #1. L'infrastructure locale PostgreSQL et Redis est configurée et testée ; sa livraison est en préparation sur `chore/local-infrastructure`.
+Le cadrage, les 13 user stories, le Kanban, les deux premiers ADR, l'arborescence et le README initial ont été validés. Le [dépôt public GitHub](https://github.com/Mouad-El-Aouiz/TicketRush) est créé et `main` est protégée. La configuration Git est livrée par la PR #1 et l'infrastructure locale par la PR #2. Le bilan de clôture de Phase 0 est en revue ; la Phase 1 n'est pas commencée.
 
 PostgreSQL et Redis démarrent avec Docker Compose ; leur santé, l'authentification et la conservation des données après recréation des conteneurs ont été vérifiées. Les dossiers d'applications restent des emplacements réservés : aucune API, CI ou application déployée n'existe encore.
 
@@ -72,6 +72,7 @@ Le service éventuellement extrait en Phase 5 sera choisi et justifié par un AD
 - [Kanban et tâches de Phase 0](docs/kanban.md)
 - [Conventions de contribution et protections Git](CONTRIBUTING.md)
 - [Démarrage, arrêt et vérifications de l'infrastructure locale](docs/runbooks/local-infrastructure.md)
+- [Bilan de Phase 0 : livrables, preuves, compétences et exercices](docs/phase-0-review.md)
 - [ADR 0001 — Choisir NestJS](docs/adr/0001-backend-framework.md)
 - [ADR 0002 — Commencer par un monolithe modulaire](docs/adr/0002-modular-monolith.md)
 
@@ -85,4 +86,4 @@ Pour les sujets de concurrence, performance et résilience, une version naïve p
 
 ## Prochaines étapes
 
-Après revue et livraison de l'infrastructure locale : produire le bilan de Phase 0 avant de commencer le socle applicatif en Phase 1.
+Valider et livrer le bilan de Phase 0, puis proposer le tag `v0.0-foundation` sur le commit de clôture. Les compétences ont été abordées avec accompagnement ; les exercices du bilan permettront de consolider la compréhension avant le socle applicatif de Phase 1.
