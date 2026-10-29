@@ -1,0 +1,188 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String         @id @default(uuid()) @db.Uuid
+  email         String         @unique
+  passwordHash  String
+  role          String         @default("CLIENT")
+  createdAt     DateTime       @default(now()) @db.Timestamptz
+  sessions      Session[]
+  events        Event[]
+  holds         Hold[]
+  orders        Order[]
+  assignments   Assignment[]
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id])
+  tokenHash String    @unique
+  expiresAt DateTime  @db.Timestamptz
+  revokedAt DateTime? @db.Timestamptz
+  createdAt DateTime  @default(now()) @db.Timestamptz
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Event {
+  id          String       @id @default(uuid()) @db.Uuid
+  organizerId String       @db.Uuid
+  organizer   User         @relation(fields: [organizerId], references: [id])
+  title       String
+  description String
+  venue       String
+  startsAt    DateTime     @db.Timestamptz
+  status      String       @default("DRAFT")
+  createdAt   DateTime     @default(now()) @db.Timestamptz
+  categories  Category[]
+  assignments Assignment[]
+
+  @@index([status, startsAt, id])
+  @@index([organizerId])
+  @@map("events")
+}
+
+model Category {
+  id         String   @id @default(uuid()) @db.Uuid
+  eventId    String   @db.Uuid
+  event      Event    @relation(fields: [eventId], references: [id])
+  name       String
+  priceCents Int
+  capacity   Int
+  holds      Hold[]
+  tickets    Ticket[]
+
+  @@index([eventId])
+  @@map("categories")
+}
+
+model Hold {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @db.Uuid
+  user           User     @relation(fields: [userId], references: [id])
+  categoryId     String   @db.Uuid
+  category       Category @relation(fields: [categoryId], references: [id])
+  quantity       Int
+  unitPriceCents Int
+  status         String   @default("ACTIVE")
+  expiresAt      DateTime @db.Timestamptz
+  createdAt      DateTime @default(now()) @db.Timestamptz
+  order          Order?
+
+  @@index([categoryId, status, expiresAt])
+  @@index([userId, createdAt])
+  @@map("holds")
+}
+
+model Order {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @db.Uuid
+  user           User     @relation(fields: [userId], references: [id])
+  holdId         String   @unique @db.Uuid
+  hold           Hold     @relation(fields: [holdId], references: [id])
+  idempotencyKey String
+  status         String   @default("PENDING")
+  totalCents     Int
+  createdAt      DateTime @default(now()) @db.Timestamptz
+  payment        Payment?
+  tickets        Ticket[]
+
+  @@unique([userId, idempotencyKey])
+  @@index([userId, createdAt])
+  @@map("orders")
+}
+
+model Payment {
+  id          String   @id @default(uuid()) @db.Uuid
+  orderId     String   @unique @db.Uuid
+  order       Order    @relation(fields: [orderId], references: [id])
+  providerRef String   @unique
+  status      String   @default("PENDING")
+  amountCents Int
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  @@map("payments")
+}
+
+model Ticket {
+  id         String    @id @default(uuid()) @db.Uuid
+  orderId    String    @db.Uuid
+  order      Order     @relation(fields: [orderId], references: [id])
+  categoryId String    @db.Uuid
+  category   Category  @relation(fields: [categoryId], references: [id])
+  seatIndex  Int
+  code       String    @unique @default(uuid()) @db.Uuid
+  scannedAt  DateTime? @db.Timestamptz
+  pdfReady   Boolean   @default(false)
+
+  @@unique([orderId, seatIndex])
+  @@index([categoryId])
+  @@map("tickets")
+}
+
+model Assignment {
+  eventId String @db.Uuid
+  userId  String @db.Uuid
+  event   Event  @relation(fields: [eventId], references: [id])
+  user    User   @relation(fields: [userId], references: [id])
+
+  @@id([eventId, userId])
+  @@map("assignments")
+}
+
+model Outbox {
+  id          String    @id @default(uuid()) @db.Uuid
+  aggregateId String    @db.Uuid
+  type        String
+  payload     Json
+  createdAt   DateTime  @default(now()) @db.Timestamptz
+  publishedAt DateTime? @db.Timestamptz
+
+  @@index([publishedAt, createdAt])
+  @@map("outbox_events")
+}
+
+model WebhookReceipt {
+  id          String   @id
+  payloadHash String
+  createdAt   DateTime @default(now()) @db.Timestamptz
+
+  @@map("processed_webhooks")
+}
+
+model Audit {
+  id        String   @id @default(uuid()) @db.Uuid
+  actorId   String   @db.Uuid
+  action    String
+  targetId  String   @db.Uuid
+  reason    String
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([targetId, createdAt])
+  @@map("audit_log")
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id])
+  orderId   String   @unique @db.Uuid
+  message   String
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
