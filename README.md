@@ -8,9 +8,9 @@ Le problème central : réserver et vendre un stock limité de places lors de de
 
 Phase 0 — cadrage et préparation du dépôt.
 
-Le cadrage, les 13 user stories, le Kanban, les deux premiers ADR, l'arborescence et le README initial ont été validés. Le [dépôt public GitHub](https://github.com/Mouad-El-Aouiz/TicketRush) est créé et `main` est protégée. La configuration Git et les conventions sont en revue ; Docker Compose reste à préparer.
+Le cadrage, les 13 user stories, le Kanban, les deux premiers ADR, l'arborescence et le README initial ont été validés. Le [dépôt public GitHub](https://github.com/Mouad-El-Aouiz/TicketRush) est créé et `main` est protégée. La configuration Git est validée et livrée par la PR #1. L'infrastructure locale PostgreSQL et Redis est configurée et testée ; sa livraison est en préparation sur `chore/local-infrastructure`.
 
-Aucune application, base de données ou infrastructure n'est encore configurée. Les dossiers d'applications sont des emplacements réservés. Il n'existe pas encore de commande de démarrage, de résultat de tests, de CI ou de déploiement à utiliser.
+PostgreSQL et Redis démarrent avec Docker Compose ; leur santé, l'authentification et la conservation des données après recréation des conteneurs ont été vérifiées. Les dossiers d'applications restent des emplacements réservés : aucune API, CI ou application déployée n'existe encore.
 
 ## MVP prévu — Phases 0 à 3
 
@@ -32,11 +32,11 @@ Les montants sont exprimés en centimes et les dates enregistrées en UTC. Les d
 |---|---|---|
 | Backend | Node.js, TypeScript strict, NestJS | Framework validé dans l'ADR 0001 ; versions à fixer lors de l'initialisation |
 | Architecture | Monolithe modulaire | Validée dans l'ADR 0002 |
-| Données | PostgreSQL et Prisma | Cible du projet ; pas encore configurée |
-| Cache et jobs | Redis et BullMQ | Cible du projet ; pas encore configurée |
+| Données | PostgreSQL et Prisma | PostgreSQL local vérifié ; Prisma à configurer |
+| Cache et jobs | Redis et BullMQ | Redis local vérifié ; BullMQ à configurer |
 | Documentation API | OpenAPI / Swagger | Prévue en Phase 1 |
 | Tests | Tests unitaires, Supertest, Testcontainers et scénarios k6 | Outils à installer et configurer aux étapes concernées |
-| Livraison | Docker Compose, images multi-stage, GitHub Actions | À préparer progressivement |
+| Livraison | Docker Compose, images multi-stage, GitHub Actions | Compose local vérifié ; images applicatives et CI à préparer |
 
 Les versions et choix de configuration seront vérifiés avant installation. Tout changement structurant sera documenté dans un ADR.
 
@@ -50,13 +50,15 @@ TicketRush/
 │   ├── notifications/       # Emplacement pour une éventuelle extraction en Phase 5
 │   └── web/                 # Frontend Next.js prévu en Phase 7
 ├── packages/               # Éléments partagés à introduire selon les besoins
-├── infra/                  # Configuration d'infrastructure à venir
+├── infra/                  # Configurations complémentaires à venir
 ├── scripts/                # Scénarios de concurrence, charge et préparation de données
 ├── docs/
 │   ├── adr/                # Décisions d'architecture
-│   ├── runbooks/           # Procédures d'exploitation à venir
+│   ├── runbooks/           # Procédures, dont l'infrastructure locale
 │   ├── kanban.md
 │   └── user-stories.md
+├── compose.yaml            # PostgreSQL et Redis locaux
+├── .env.example            # Modèle de configuration sans secrets
 └── README.md
 ```
 
@@ -69,6 +71,7 @@ Le service éventuellement extrait en Phase 5 sera choisi et justifié par un AD
 - [User stories du MVP et critères d'acceptation](docs/user-stories.md)
 - [Kanban et tâches de Phase 0](docs/kanban.md)
 - [Conventions de contribution et protections Git](CONTRIBUTING.md)
+- [Démarrage, arrêt et vérifications de l'infrastructure locale](docs/runbooks/local-infrastructure.md)
 - [ADR 0001 — Choisir NestJS](docs/adr/0001-backend-framework.md)
 - [ADR 0002 — Commencer par un monolithe modulaire](docs/adr/0002-modular-monolith.md)
 
@@ -82,4 +85,4 @@ Pour les sujets de concurrence, performance et résilience, une version naïve p
 
 ## Prochaines étapes
 
-Après revue de la configuration Git : préparer PostgreSQL et Redis avec Docker Compose. Les prérequis et commandes de démarrage seront ajoutés après vérification réelle du fonctionnement.
+Après revue et livraison de l'infrastructure locale : produire le bilan de Phase 0 avant de commencer le socle applicatif en Phase 1.
