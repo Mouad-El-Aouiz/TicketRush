@@ -6,11 +6,25 @@ Le problème central : réserver et vendre un stock limité de places lors de de
 
 ## État actuel
 
-Phase 0 — cadrage et préparation du dépôt.
+Phase 1 — socle de l'API en préparation.
 
-Le cadrage, les 13 user stories, le Kanban, les deux premiers ADR, l'arborescence et le README initial ont été validés. Le [dépôt public GitHub](https://github.com/Mouad-El-Aouiz/TicketRush) est créé et `main` est protégée. La configuration Git est livrée par la PR #1 et l'infrastructure locale par la PR #2. Le bilan de clôture de Phase 0 est en revue ; la Phase 1 n'est pas commencée.
+La Phase 0 est validée et clôturée par la PR #3 et le tag `v0.0-foundation`. Le [dépôt public GitHub](https://github.com/Mouad-El-Aouiz/TicketRush) est créé et `main` est protégée. Le socle API est développé sur `chore/api-foundation` ; il reste à livrer par PR.
 
-PostgreSQL et Redis démarrent avec Docker Compose ; leur santé, l'authentification et la conservation des données après recréation des conteneurs ont été vérifiées. Les dossiers d'applications restent des emplacements réservés : aucune API, CI ou application déployée n'existe encore.
+PostgreSQL et Redis démarrent avec Docker Compose ; santé, authentification et persistance sont vérifiées. L'API NestJS possède une route de démonstration vérifiée ; les autres applications restent des emplacements réservés. Aucune fonctionnalité métier, CI ou application déployée n'existe encore.
+
+## Démarrer le socle API
+
+Utiliser Node.js 26.13.0 et pnpm 10.34.9. Depuis la racine :
+
+```powershell
+pnpm install --frozen-lockfile
+pnpm build
+pnpm --filter @ticketrush/api start:prod
+```
+
+Ouvrir http://127.0.0.1:3000/ : réponse attendue `Hello World!`. Arrêter avec Ctrl+C. `pnpm dev` propose le mode développement avec surveillance des fichiers. Le serveur compilé a été vérifié ; la surveillance n'a pas encore été testée.
+
+Contrôles disponibles : `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test` et `pnpm test:e2e`. Résultats : contrôles réussis, 13 tests unitaires et un test HTTP. L'API ne se connecte pas encore aux services de données et ne charge pas le `.env` Compose. Voir le [guide API](apps/api/README.md).
 
 ## MVP prévu — Phases 0 à 3
 
@@ -30,12 +44,12 @@ Les montants sont exprimés en centimes et les dates enregistrées en UTC. Les d
 
 | Élément | Choix ou cible | État |
 |---|---|---|
-| Backend | Node.js, TypeScript strict, NestJS | Framework validé dans l'ADR 0001 ; versions à fixer lors de l'initialisation |
+| Backend | Node.js, TypeScript strict, NestJS | Socle vérifié : Node.js 26.13.0, TypeScript 6.0.3, NestJS 12.3.2 |
 | Architecture | Monolithe modulaire | Validée dans l'ADR 0002 |
 | Données | PostgreSQL et Prisma | PostgreSQL local vérifié ; Prisma à configurer |
 | Cache et jobs | Redis et BullMQ | Redis local vérifié ; BullMQ à configurer |
 | Documentation API | OpenAPI / Swagger | Prévue en Phase 1 |
-| Tests | Tests unitaires, Supertest, Testcontainers et scénarios k6 | Outils à installer et configurer aux étapes concernées |
+| Tests | Vitest, Supertest, futurs Testcontainers et scénarios k6 | Premiers tests Vitest/Supertest vérifiés ; tests de données et de charge à venir |
 | Livraison | Docker Compose, images multi-stage, GitHub Actions | Compose local vérifié ; images applicatives et CI à préparer |
 
 Les versions et choix de configuration seront vérifiés avant installation. Tout changement structurant sera documenté dans un ADR.
@@ -45,7 +59,7 @@ Les versions et choix de configuration seront vérifiés avant installation. Tou
 ```text
 TicketRush/
 ├── apps/
-│   ├── api/                 # API NestJS à construire
+│   ├── api/                 # Socle NestJS vérifié ; métier à construire
 │   ├── fake-payment/        # Fournisseur simulé prévu en Phase 3
 │   ├── notifications/       # Emplacement pour une éventuelle extraction en Phase 5
 │   └── web/                 # Frontend Next.js prévu en Phase 7
@@ -59,6 +73,9 @@ TicketRush/
 │   └── user-stories.md
 ├── compose.yaml            # PostgreSQL et Redis locaux
 ├── .env.example            # Modèle de configuration sans secrets
+├── package.json            # Outils et commandes du workspace
+├── pnpm-workspace.yaml     # Applications et packages du monorepo
+├── pnpm-lock.yaml          # Versions résolues des dépendances
 └── README.md
 ```
 
@@ -75,6 +92,7 @@ Le service éventuellement extrait en Phase 5 sera choisi et justifié par un AD
 - [Bilan de Phase 0 : livrables, preuves, compétences et exercices](docs/phase-0-review.md)
 - [ADR 0001 — Choisir NestJS](docs/adr/0001-backend-framework.md)
 - [ADR 0002 — Commencer par un monolithe modulaire](docs/adr/0002-modular-monolith.md)
+- [ADR 0003 — Outillage du workspace et de l'API](docs/adr/0003-workspace-tooling.md)
 
 ## Méthode de travail
 
@@ -86,4 +104,4 @@ Pour les sujets de concurrence, performance et résilience, une version naïve p
 
 ## Prochaines étapes
 
-Valider et livrer le bilan de Phase 0, puis proposer le tag `v0.0-foundation` sur le commit de clôture. Les compétences ont été abordées avec accompagnement ; les exercices du bilan permettront de consolider la compréhension avant le socle applicatif de Phase 1.
+Revoir et livrer le socle API par PR, puis cadrer la connexion à PostgreSQL et le modèle de données. Les compétences ont été abordées avec accompagnement ; les exercices du bilan de Phase 0 restent disponibles pour une pratique autonome.

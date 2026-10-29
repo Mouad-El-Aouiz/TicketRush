@@ -1,0 +1,19 @@
+{
+  "name": "ticketrush",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.34.9",
+  "scripts": {
+    "dev": "pnpm --filter @ticketrush/api start:dev",
+    "build": "pnpm --filter @ticketrush/api build",
+    "typecheck": "pnpm --filter @ticketrush/api typecheck",
+    "lint": "pnpm --filter @ticketrush/api lint",
+    "format:check": "pnpm --filter @ticketrush/api format:check",
+    "test": "pnpm --filter @ticketrush/api test",
+    "test:e2e": "pnpm --filter @ticketrush/api test:e2e"
+  },
+  "engines": {
+    "node": ">=26.13.0 <27",
+    "pnpm": "10.34.9"
+  }
+}
