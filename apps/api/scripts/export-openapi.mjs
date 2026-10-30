@@ -78,6 +78,7 @@ try {
       password: z.string().min(12).max(128),
     }),
     Tokens: z.object({ accessToken: z.string(), expiresIn: z.number() }),
+    GoogleSignInStatus: z.object({ enabled: z.boolean() }),
     CsvImportReport: z.object({
       rows: z.number().int(),
       imported: z.number().int(),
@@ -124,6 +125,7 @@ try {
     '/api/auth/login': { post: 'Tokens' },
     '/api/auth/register': { post: 'Tokens' },
     '/api/auth/refresh': { post: 'Tokens' },
+    '/api/auth/google/status': { get: 'GoogleSignInStatus' },
     '/api/orders/{id}': { get: 'Order' },
     '/api/imports/events': { post: 'CsvImportReport' },
     '/api/organizer/webhooks': {
@@ -158,6 +160,13 @@ try {
             schema: { $ref: '#/components/schemas/Credentials' },
           },
         },
+      };
+  }
+  for (const path of ['/api/auth/google', '/api/auth/google/callback']) {
+    const operation = document.paths[path]?.get;
+    if (operation)
+      operation.responses = {
+        302: { description: 'Redirects to continue Google sign-in' },
       };
   }
   const createWebhook = document.paths['/api/organizer/webhooks']?.post;

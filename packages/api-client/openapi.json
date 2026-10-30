@@ -578,6 +578,55 @@
         ]
       }
     },
+    "/api/auth/google/status": {
+      "get": {
+        "operationId": "GoogleAuthController_status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleSignInStatus"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/auth/google": {
+      "get": {
+        "operationId": "GoogleAuthController_begin",
+        "parameters": [],
+        "responses": {
+          "302": {
+            "description": "Redirects to continue Google sign-in"
+          }
+        },
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/auth/google/callback": {
+      "get": {
+        "operationId": "GoogleAuthController_callback",
+        "parameters": [],
+        "responses": {
+          "302": {
+            "description": "Redirects to continue Google sign-in"
+          }
+        },
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
     "/api/admin/users": {
       "get": {
         "operationId": "AdminController_users",
@@ -1570,6 +1619,18 @@
         "required": [
           "accessToken",
           "expiresIn"
+        ],
+        "additionalProperties": false
+      },
+      "GoogleSignInStatus": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
         ],
         "additionalProperties": false
       },

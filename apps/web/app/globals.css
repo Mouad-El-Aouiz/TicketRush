@@ -683,6 +683,19 @@ footer .brand {
 .wide {
   width: 100%;
 }
+.google-login {
+  display: block;
+  margin-top: 10px;
+  padding: 12px 18px;
+  text-align: center;
+}
+.auth-divider {
+  margin: 16px 0 4px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+  text-transform: uppercase;
+}
 label {
   display: block;
   font-size: 12px;
