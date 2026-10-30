@@ -1,7 +1,7 @@
 import { config } from 'dotenv';
 import { Client } from 'pg';
 import { randomBytes } from 'node:crypto';
-import { readFile, appendFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
 const path = fileURLToPath(new URL('../../../.env', import.meta.url));
@@ -34,6 +34,10 @@ if (!process.env.DATABASE_URL) {
   } finally { await client.end(); }
   values.DATABASE_URL = `postgresql://ticketrush_app:${appPassword}@${host}:${port}/${db}`;
 }
-const missing = Object.entries(values).filter(([key]) => !new RegExp(`^${key}=`, 'm').test(existing));
-await appendFile(path, '\n'+missing.map(([k,v])=>`${k}=${v}`).join('\n')+'\n');
+let updated = existing;
+for (const [key, value] of Object.entries(values)) {
+  const line = new RegExp(`^${key}=.*$`, 'm');
+  updated = line.test(updated) ? updated.replace(line, `${key}=${value}`) : `${updated}\n${key}=${value}\n`;
+}
+await writeFile(path, updated);
 console.log('Local application configuration prepared. Secrets were not displayed.');

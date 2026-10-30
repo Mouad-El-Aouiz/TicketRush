@@ -1,0 +1,31 @@
+{
+  "name": "@ticketrush/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1 --port 3001",
+    "build": "next build && node scripts/prepare-standalone.mjs",
+    "start": "node scripts/start.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint app components next.config.ts --max-warnings=0"
+  },
+  "dependencies": {
+    "next": "16.4.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "@ticketrush/api-client": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/node": "^26",
+    "eslint": "10.13.0",
+    "@eslint/js": "10.0.1",
+    "typescript-eslint": "8.72.1",
+    "globals": "17.13.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-react-hooks": "7.1.1"
+  }
+}
