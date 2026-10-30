@@ -12,10 +12,12 @@ import { RuntimeModule } from './runtime/runtime.module.js';
 import { OperationsModule } from './operations/operations.module.js';
 import { ImportsModule } from './imports/imports.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
+import { AssistantModule } from './assistant/assistant.module.js';
 
 @Module({
   imports: [
     NotificationsModule,
+    AssistantModule,
     ImportsModule,
     RuntimeModule,
     OperationsModule,

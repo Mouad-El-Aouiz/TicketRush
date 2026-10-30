@@ -15,125 +15,56 @@
         ]
       }
     },
-    "/api/imports/events": {
-      "post": {
-        "operationId": "ImportsController_events",
+    "/api/assistant/status": {
+      "get": {
+        "operationId": "AssistantController_status",
         "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "text/csv": {
-              "schema": {
-                "type": "string",
-                "format": "binary",
-                "description": "title,description,venue,startsAt,category,capacity,priceCents"
-              }
-            }
-          }
-        },
         "responses": {
-          "201": {
+          "200": {
             "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CsvImportReport"
+                  "$ref": "#/components/schemas/AssistantStatus"
                 }
               }
             }
           }
         },
         "tags": [
-          "CSV imports"
+          "Assistant documentaire"
         ]
       }
     },
-    "/api/ops/live": {
-      "get": {
-        "operationId": "OperationsController_live",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Operations"
-        ]
-      }
-    },
-    "/api/ops/ready": {
-      "get": {
-        "operationId": "OperationsController_ready",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Operations"
-        ]
-      }
-    },
-    "/api/ops/metrics": {
-      "get": {
-        "operationId": "OperationsController_scrape",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Operations"
-        ]
-      }
-    },
-    "/api/live/events/{id}": {
-      "get": {
-        "operationId": "LiveController_stream",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "tags": [
-          "Live"
-        ]
-      }
-    },
-    "/api/live/events/{id}/queue": {
+    "/api/assistant/ask": {
       "post": {
-        "operationId": "LiveController_queue",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "operationId": "AssistantController_ask",
+        "parameters": [],
         "responses": {
           "201": {
-            "description": ""
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantAnswer"
+                }
+              }
+            }
           }
         },
         "tags": [
-          "Live"
-        ]
+          "Assistant documentaire"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistantQuestion"
+              }
+            }
+          }
+        }
       }
     },
     "/api/events": {
@@ -340,6 +271,127 @@
         ],
         "tags": [
           "Events"
+        ]
+      }
+    },
+    "/api/imports/events": {
+      "post": {
+        "operationId": "ImportsController_events",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/csv": {
+              "schema": {
+                "type": "string",
+                "format": "binary",
+                "description": "title,description,venue,startsAt,category,capacity,priceCents"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CsvImportReport"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "CSV imports"
+        ]
+      }
+    },
+    "/api/ops/live": {
+      "get": {
+        "operationId": "OperationsController_live",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Operations"
+        ]
+      }
+    },
+    "/api/ops/ready": {
+      "get": {
+        "operationId": "OperationsController_ready",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Operations"
+        ]
+      }
+    },
+    "/api/ops/metrics": {
+      "get": {
+        "operationId": "OperationsController_scrape",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Operations"
+        ]
+      }
+    },
+    "/api/live/events/{id}": {
+      "get": {
+        "operationId": "LiveController_stream",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Live"
+        ]
+      }
+    },
+    "/api/live/events/{id}/queue": {
+      "post": {
+        "operationId": "LiveController_queue",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "Live"
         ]
       }
     },
@@ -1631,6 +1683,71 @@
         },
         "required": [
           "enabled"
+        ],
+        "additionalProperties": false
+      },
+      "AssistantStatus": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "additionalProperties": false
+      },
+      "AssistantQuestion": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "question"
+        ],
+        "additionalProperties": false
+      },
+      "AssistantAnswer": {
+        "type": "object",
+        "properties": {
+          "answer": {
+            "type": "string"
+          },
+          "citations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "sourceId": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "sourceId",
+                "title"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "suggestedQuestions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "answer",
+          "citations",
+          "suggestedQuestions"
         ],
         "additionalProperties": false
       },

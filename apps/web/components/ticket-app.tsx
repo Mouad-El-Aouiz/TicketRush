@@ -13,11 +13,13 @@ import EventCard from "./event-card";
 import ReservationDialog from "./reservation-dialog";
 import OrdersPanel from "./orders-panel";
 import StaffPanel from "./staff-panel";
+import AssistantDialog from "./assistant-dialog";
 
 export default function TicketApp() {
   const [user, setUser] = useState<User | null>(null);
   const [tab, setTab] = useState("explore");
   const [auth, setAuth] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
   const [selected, setSelected] = useState<Event | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [search, setSearch] = useState("");
@@ -123,6 +125,7 @@ export default function TicketApp() {
               Mes billets
             </button>
           )}
+          <button onClick={() => setAssistantOpen(true)}>Aide IA</button>
           {user && user.role !== "CLIENT" && (
             <button
               className={tab === "staff" ? "nav-active" : ""}
@@ -366,6 +369,9 @@ export default function TicketApp() {
         <span className="muted">Démonstration locale · Paiements simulés</span>
       </footer>
       {auth && <AuthDialog onClose={() => setAuth(false)} onUser={setUser} />}
+      {assistantOpen && (
+        <AssistantDialog onClose={() => setAssistantOpen(false)} />
+      )}
       {selected && (
         <ReservationDialog
           event={selected}

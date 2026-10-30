@@ -84,6 +84,22 @@ describe('Platform authorization and validation', () => {
       else process.env.GOOGLE_CLIENT_SECRET = clientSecret;
     }
   });
+  it('reports the documentation assistant disabled without local Ollama', async () => {
+    const ollamaUrl = process.env.OLLAMA_BASE_URL;
+    process.env.OLLAMA_BASE_URL = '';
+    try {
+      await request(app.getHttpServer())
+        .get('/api/assistant/status')
+        .expect(200, { enabled: false });
+      await request(app.getHttpServer())
+        .post('/api/assistant/ask')
+        .send({ question: 'Where are my tickets?' })
+        .expect(503);
+    } finally {
+      if (ollamaUrl === undefined) delete process.env.OLLAMA_BASE_URL;
+      else process.env.OLLAMA_BASE_URL = ollamaUrl;
+    }
+  });
   it('requires authentication and the organizer role', async () => {
     await request(app.getHttpServer()).get('/api/auth/me').expect(401);
     await request(app.getHttpServer())

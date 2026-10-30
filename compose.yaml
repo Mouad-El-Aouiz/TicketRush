@@ -2,7 +2,7 @@ name: ticketrush
 
 services:
   postgres:
-    image: postgres:18
+    image: pgvector/pgvector:0.8.7-pg18-trixie
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-ticketrush}
       POSTGRES_USER: ${POSTGRES_USER:-ticketrush}
