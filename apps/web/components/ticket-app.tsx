@@ -28,6 +28,13 @@ export default function TicketApp() {
   const [notice, setNotice] = useState("");
   useEffect(() => {
     let active = true;
+    const query = new URLSearchParams(window.location.search);
+    if (query.get("authError") === "google") {
+      setNotice(
+        "Connexion Google impossible. Vérifiez la configuration puis réessayez.",
+      );
+      window.history.replaceState({}, "", window.location.pathname);
+    }
     void refresh()
       .then(() => api<User>("/auth/me"))
       .then((u) => {

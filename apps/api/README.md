@@ -34,3 +34,7 @@ pnpm --filter @ticketrush/api test:e2e
 ```
 
 `pnpm test:e2e` utilise PostgreSQL et Redis locaux. Les tests de cible webhook remplacent le résolveur DNS; les tests d'envoi simulent la réponse HTTPS sans contacter un hôte externe.
+
+# Connexion Google (facultative)
+
+Configurer `GOOGLE_CLIENT_ID` et `GOOGLE_CLIENT_SECRET` dans le `.env` local. Le callback par défaut est `${WEB_ORIGIN}/api/auth/google/callback`; cette URL doit être déclarée exactement dans le client OAuth Google. En Docker, `WEB_ORIGIN` vaut `http://127.0.0.1:8080`; avec les serveurs Next/API séparés, il vaut `http://127.0.0.1:3001`. Les routes `/auth/google/status`, `/auth/google` et `/auth/google/callback` utilisent le flux OIDC serveur avec PKCE. Sans les deux identifiants, le bouton n'apparaît pas. Voir [ADR 0009](../../docs/adr/0009-google-oidc.md).

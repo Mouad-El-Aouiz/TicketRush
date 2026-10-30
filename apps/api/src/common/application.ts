@@ -58,7 +58,9 @@ export function configure<T extends INestApplication>(app: T): T {
     });
     if (
       req.method === 'POST' &&
-      /^\/api\/auth\/(login|register|refresh)$/.test(req.path)
+      /^\/api\/auth\/(login|register|refresh|google|google\/callback)$/.test(
+        req.path,
+      )
     ) {
       void runtime
         .limit(`auth:${req.socket.remoteAddress ?? 'local'}`, 30)

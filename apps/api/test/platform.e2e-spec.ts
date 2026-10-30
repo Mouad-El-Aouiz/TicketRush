@@ -68,6 +68,22 @@ describe('Platform authorization and validation', () => {
     expect(result.body).toMatchObject({ code: 'VALIDATION_ERROR' });
     expect(result.headers['x-correlation-id']).toBeTruthy();
   });
+  it('keeps Google sign-in disabled when local OAuth credentials are absent', async () => {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    process.env.GOOGLE_CLIENT_ID = '';
+    process.env.GOOGLE_CLIENT_SECRET = '';
+    try {
+      await request(app.getHttpServer())
+        .get('/api/auth/google/status')
+        .expect(200, { enabled: false });
+    } finally {
+      if (clientId === undefined) delete process.env.GOOGLE_CLIENT_ID;
+      else process.env.GOOGLE_CLIENT_ID = clientId;
+      if (clientSecret === undefined) delete process.env.GOOGLE_CLIENT_SECRET;
+      else process.env.GOOGLE_CLIENT_SECRET = clientSecret;
+    }
+  });
   it('requires authentication and the organizer role', async () => {
     await request(app.getHttpServer()).get('/api/auth/me').expect(401);
     await request(app.getHttpServer())

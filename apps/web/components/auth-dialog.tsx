@@ -1,5 +1,5 @@
 "use client";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { api, setToken, type User } from "@ticketrush/api-client";
 import Modal from "./modal";
 export default function AuthDialog({
@@ -12,6 +12,12 @@ export default function AuthDialog({
   const [register, setRegister] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [googleEnabled, setGoogleEnabled] = useState(false);
+  useEffect(() => {
+    void api<{ enabled: boolean }>("/auth/google/status")
+      .then((status) => setGoogleEnabled(status.enabled))
+      .catch(() => setGoogleEnabled(false));
+  }, []);
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
@@ -95,6 +101,14 @@ export default function AuthDialog({
                 : "Me connecter"}
           </button>
         </form>
+        {googleEnabled && (
+          <>
+            <div className="auth-divider">ou</div>
+            <a className="secondary wide google-login" href="/api/auth/google">
+              Continuer avec Google
+            </a>
+          </>
+        )}
         <button
           className="text-button"
           onClick={() => {

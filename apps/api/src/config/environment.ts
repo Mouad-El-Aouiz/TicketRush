@@ -17,6 +17,18 @@ const schema = z
     PAYMENT_SECRET: z.string().min(48),
     WEBHOOK_ENCRYPTION_KEY: z.string().regex(/^[a-f0-9]{64}$/),
     WEB_ORIGIN: z.url().default('http://127.0.0.1:3001'),
+    GOOGLE_CLIENT_ID: z.preprocess(
+      (value) => (value === '' ? undefined : value),
+      z.string().min(1).optional(),
+    ),
+    GOOGLE_CLIENT_SECRET: z.preprocess(
+      (value) => (value === '' ? undefined : value),
+      z.string().min(1).optional(),
+    ),
+    GOOGLE_REDIRECT_URI: z.preprocess(
+      (value) => (value === '' ? undefined : value),
+      z.url().optional(),
+    ),
     API_HOST: z.enum(['127.0.0.1', '0.0.0.0']).default('127.0.0.1'),
     PAYMENT_PROVIDER_URL: z.url().default('http://127.0.0.1:4000'),
     REDIS_PASSWORD: z.string().min(1),
@@ -36,6 +48,16 @@ const schema = z
     ),
   })
   .superRefine((env, ctx) => {
+    const googleFields = [
+      env.GOOGLE_CLIENT_ID,
+      env.GOOGLE_CLIENT_SECRET,
+    ].filter(Boolean).length;
+    if (googleFields !== 0 && googleFields !== 2)
+      ctx.addIssue({
+        code: 'custom',
+        path: ['GOOGLE_CLIENT_SECRET'],
+        message: 'Configure both Google OAuth credentials together',
+      });
     const fields = [
       'NOTIFICATIONS_BROKER_URL',
       'NOTIFICATIONS_URL',
