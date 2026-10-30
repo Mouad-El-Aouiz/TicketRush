@@ -1,107 +1,84 @@
 # TicketRush
 
-Projet pédagogique de billetterie pour pratiquer le backend Node.js et TypeScript de niveau intermédiaire, avec les compétences transversales nécessaires à sa livraison et à son exploitation.
+Billetterie locale : catalogue, comptes et rôles, réservation de 10 minutes, paiement simulé, billets PDF avec QR et contrôle à usage unique.
 
-Le problème central : réserver et vendre un stock limité de places lors de demandes simultanées, sans survente ni doublons.
+Le stock est vérifié dans une transaction PostgreSQL sous verrou. Les commandes et confirmations de paiement sont idempotentes. Redis/BullMQ traite l’expiration et les PDF ; une outbox évite de perdre le travail après validation du paiement.
 
-## État actuel
+## Démarrage local
 
-Phase 1 — socle de l'API en préparation.
-
-La Phase 0 est validée et clôturée par la PR #3 et le tag `v0.0-foundation`. Le [dépôt public GitHub](https://github.com/Mouad-El-Aouiz/TicketRush) est créé et `main` est protégée. Le socle API est développé sur `chore/api-foundation` ; il reste à livrer par PR.
-
-PostgreSQL et Redis démarrent avec Docker Compose ; santé, authentification et persistance sont vérifiées. L'API NestJS possède une route de démonstration vérifiée ; les autres applications restent des emplacements réservés. Aucune fonctionnalité métier, CI ou application déployée n'existe encore.
-
-## Démarrer le socle API
-
-Utiliser Node.js 26.13.0 et pnpm 10.34.9. Depuis la racine :
+Prérequis : Docker Desktop actif, Node.js 26.13.0 et pnpm 10.34.9. Depuis ce dossier :
 
 ```powershell
 pnpm install --frozen-lockfile
+pnpm local:setup
+```
+
+Cette commande crée les secrets locaux dans `.env`, prépare PostgreSQL/Redis, les droits SQL, les migrations et les comptes de démonstration. Aucun secret n’est versionné.
+
+Pour démarrer toute l’application dans Docker :
+
+```powershell
+docker compose -f compose.yaml -f compose.app.yaml up -d --build --wait
+```
+
+Ouvrir [TicketRush](http://127.0.0.1:8080). L’API est accessible sous `/api` et Swagger sous `/api/docs`. Nginx répartit les requêtes sur deux instances API. Les ports exposés sont liés à localhost ; aucune mise en ligne n’est réalisée.
+
+Comptes : `client@ticketrush.local`, `organisateur@ticketrush.local`, `controleur@ticketrush.local`, `admin@ticketrush.local`. Leur mot de passe commun de démonstration est la valeur `DEMO_PASSWORD` du `.env` local. Chaque rôle a son espace dans l’interface. Les événements de démonstration sont renouvelés par `db:seed`.
+
+Pour travailler avec Node sur l’hôte, laisser uniquement PostgreSQL/Redis dans Docker, puis :
+
+```powershell
 pnpm build
-pnpm --filter @ticketrush/api start:prod
+pnpm local:start
 ```
 
-Ouvrir http://127.0.0.1:3000/ : réponse attendue `Hello World!`. Arrêter avec Ctrl+C. `pnpm dev` propose le mode développement avec surveillance des fichiers. Le serveur compilé a été vérifié ; la surveillance n'a pas encore été testée.
+Interface : [127.0.0.1:3001](http://127.0.0.1:3001), API : [127.0.0.1:3000/api](http://127.0.0.1:3000/api). Ne pas lancer simultanément les deux modes pour une campagne de mesure. Ctrl+C arrête le lanceur local. Les volumes Docker conservent les données lors d’un arrêt normal.
 
-Contrôles disponibles : `pnpm typecheck`, `pnpm lint`, `pnpm format:check`, `pnpm test` et `pnpm test:e2e`. Résultats : contrôles réussis, 13 tests unitaires et un test HTTP. L'API ne se connecte pas encore aux services de données et ne charge pas le `.env` Compose. Voir le [guide API](apps/api/README.md).
+## Vérifications
 
-## MVP prévu — Phases 0 à 3
-
-- Catalogue public d'événements et catégories de places non numérotées.
-- Comptes et accès selon les rôles CLIENT, ORGANISATEUR, CONTROLEUR et ADMIN, avec contrôle de l'appartenance des ressources.
-- Connexion obligatoire pour réserver ; réservation temporaire de 10 minutes.
-- Gestion du stock sous concurrence, expiration des réservations et commandes idempotentes.
-- Paiement simulé avec webhooks signés et traitement des événements rejoués.
-- Un billet PDF avec QR code par place achetée ; un seul scan accepté par billet.
-- Traitements asynchrones avec reprises sur erreur et suivi des échecs.
-
-Un paiement doit être confirmé avant expiration pour valider la commande. Une confirmation tardive ne délivre aucun billet et entraîne une annulation ou un remboursement simulé.
-
-Les montants sont exprimés en centimes et les dates enregistrées en UTC. Les décisions métier encore ouvertes sont signalées dans les user stories et seront résolues avant l'implémentation concernée.
-
-## Choix techniques
-
-| Élément | Choix ou cible | État |
-|---|---|---|
-| Backend | Node.js, TypeScript strict, NestJS | Socle vérifié : Node.js 26.13.0, TypeScript 6.0.3, NestJS 12.3.2 |
-| Architecture | Monolithe modulaire | Validée dans l'ADR 0002 |
-| Données | PostgreSQL et Prisma | PostgreSQL local vérifié ; Prisma à configurer |
-| Cache et jobs | Redis et BullMQ | Redis local vérifié ; BullMQ à configurer |
-| Documentation API | OpenAPI / Swagger | Prévue en Phase 1 |
-| Tests | Vitest, Supertest, futurs Testcontainers et scénarios k6 | Premiers tests Vitest/Supertest vérifiés ; tests de données et de charge à venir |
-| Livraison | Docker Compose, images multi-stage, GitHub Actions | Compose local vérifié ; images applicatives et CI à préparer |
-
-Les versions et choix de configuration seront vérifiés avant installation. Tout changement structurant sera documenté dans un ADR.
-
-## Organisation du dépôt
-
-```text
-TicketRush/
-├── apps/
-│   ├── api/                 # Socle NestJS vérifié ; métier à construire
-│   ├── fake-payment/        # Fournisseur simulé prévu en Phase 3
-│   ├── notifications/       # Emplacement pour une éventuelle extraction en Phase 5
-│   └── web/                 # Frontend Next.js prévu en Phase 7
-├── packages/               # Éléments partagés à introduire selon les besoins
-├── infra/                  # Configurations complémentaires à venir
-├── scripts/                # Scénarios de concurrence, charge et préparation de données
-├── docs/
-│   ├── adr/                # Décisions d'architecture
-│   ├── runbooks/           # Procédures, dont l'infrastructure locale
-│   ├── kanban.md
-│   └── user-stories.md
-├── compose.yaml            # PostgreSQL et Redis locaux
-├── .env.example            # Modèle de configuration sans secrets
-├── package.json            # Outils et commandes du workspace
-├── pnpm-workspace.yaml     # Applications et packages du monorepo
-├── pnpm-lock.yaml          # Versions résolues des dépendances
-└── README.md
+```powershell
+pnpm typecheck
+pnpm lint
+pnpm format:check
+pnpm test
+pnpm test:e2e
 ```
 
-Les fichiers `.gitkeep` permettent de conserver les dossiers encore vides dans Git. Git suit les fichiers, pas les dossiers vides ; `.gitkeep` est une convention sans comportement particulier. Un emplacement réservé ne signifie pas qu'une application y est implémentée.
+Les tests d’intégration utilisent de vrais PostgreSQL/Redis. GitHub Actions les exécute sur des services neufs et construit API/interface. Le scénario suivant vérifie réellement Nginx → API → fournisseur simulé → webhook → worker → PDF → contrôle, puis retire son événement temporaire :
 
-Le service éventuellement extrait en Phase 5 sera choisi et justifié par un ADR ; le dossier `apps/notifications/` ne décide pas cette extraction à lui seul.
+```powershell
+node --env-file=.env scripts/smoke-local.mjs
+```
 
-## Documents de référence
+Les résultats et limites des mesures sont consignés dans [le bilan opérations](docs/operations-review.md). Les tests n’attestent pas une capacité de production ni la maîtrise autonome des compétences pédagogiques.
 
-- [User stories du MVP et critères d'acceptation](docs/user-stories.md)
-- [Kanban et tâches de Phase 0](docs/kanban.md)
-- [Conventions de contribution et protections Git](CONTRIBUTING.md)
-- [Démarrage, arrêt et vérifications de l'infrastructure locale](docs/runbooks/local-infrastructure.md)
-- [Bilan de Phase 0 : livrables, preuves, compétences et exercices](docs/phase-0-review.md)
-- [ADR 0001 — Choisir NestJS](docs/adr/0001-backend-framework.md)
-- [ADR 0002 — Commencer par un monolithe modulaire](docs/adr/0002-modular-monolith.md)
-- [ADR 0003 — Outillage du workspace et de l'API](docs/adr/0003-workspace-tooling.md)
+## Supervision locale optionnelle
 
-## Méthode de travail
+```powershell
+docker compose -f compose.yaml -f compose.app.yaml -f compose.observability.yaml up -d --build --wait
+```
 
-Les explications et documents pédagogiques sont en français ; le code, les noms techniques, les messages d'erreur et les commits sont en anglais.
+- [Grafana](http://127.0.0.1:3002) : utilisateur `admin`, mot de passe `GRAFANA_PASSWORD` dans `.env`, dashboard TicketRush provisionné.
+- [Prometheus](http://127.0.0.1:9090) : métriques séparées des deux API.
+- [Jaeger](http://127.0.0.1:16686) : traces du service `ticketrush-api`.
+- `/api/ops/live` et `/api/ops/ready` : santé du processus et des dépendances.
 
-Chaque tâche avance par petites étapes : compréhension, conception, explication, implémentation, tests adaptés, vérification et clôture. Les étapes clés nécessitent une validation explicite.
+Les traces restent sur cette machine. Voir [la procédure incident](docs/runbooks/incident.md).
 
-Pour les sujets de concurrence, performance et résilience, une version naïve permet d'abord de reproduire et mesurer le problème ; la correction est ensuite vérifiée. Les commits suivront Conventional Commits et les changements passeront par une PR lorsque le dépôt distant sera configuré.
+## Périmètre livré et suite
 
-## Prochaines étapes
+Le MVP fonctionne avec une interface Next.js, NestJS, Prisma/PostgreSQL, Redis/BullMQ, paiement fictif, PDF/QR, administration et contrôle. Cache, SSE, protections de débit, retries/circuit breaker/bulkhead, images Docker et CI sont ajoutés dans le lot opérations.
 
-Revoir et livrer le socle API par PR, puis cadrer la connexion à PostgreSQL et le modèle de données. Les compétences ont été abordées avec accompagnement ; les exercices du bilan de Phase 0 restent disponibles pour une pratique autonome.
+L’extraction notifications/RabbitMQ, l’import CSV, Google OAuth et l’assistant documentaire constituent les extensions suivantes ; ils ne sont pas annoncés comme terminés. Le dossier notifications reste réservé tant que son service n’est pas livré. Aucune transaction bancaire réelle, inscription à un cloud ou dépense n’est nécessaire au fonctionnement local.
+
+## Documents
+
+- [Règles métier et critères d’acceptation](docs/user-stories.md)
+- [Décisions d’architecture](docs/adr/0004-business-rules.md)
+- [Bilan concurrence, commandes, paiement et livraison](docs/phase-2-3-review.md)
+- [Bilan interface et vérification navigateur](docs/web-review.md)
+- [Guide API](apps/api/README.md)
+- [Guide interface](apps/web/README.md)
+- [Conventions de contribution](CONTRIBUTING.md)
+
+Le code et les commits utilisent l’anglais ; les explications pédagogiques sont en français. Les modifications sont livrées par branches et PR avec contrôles avant fusion.

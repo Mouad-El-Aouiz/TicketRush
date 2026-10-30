@@ -89,6 +89,11 @@ describe('Commerce invariants on real PostgreSQL', () => {
     await db.assignment.create({ data: { eventId, userId: controllerId } });
   });
   afterAll(async () => {
+    if (eventId)
+      await db.event.update({
+        where: { id: eventId },
+        data: { status: 'WITHDRAWN' },
+      });
     await app.close();
   });
 
