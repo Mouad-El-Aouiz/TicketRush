@@ -1,5 +1,6 @@
 import type { components } from "./schema";
 export type User = components["schemas"]["User"];
+export type CsvImportReport = components["schemas"]["CsvImportReport"];
 export type Category = components["schemas"]["Category"];
 export type Event = components["schemas"]["Event"];
 export type Hold = components["schemas"]["Hold"];
@@ -49,7 +50,8 @@ export async function api<T>(
   retry = true,
 ): Promise<T> {
   const headers = new Headers(options.headers);
-  if (options.body) headers.set("content-type", "application/json");
+  if (options.body && !headers.has("content-type"))
+    headers.set("content-type", "application/json");
   if (token) headers.set("authorization", `Bearer ${token}`);
   const response = await fetch(`/api${path}`, {
     ...options,

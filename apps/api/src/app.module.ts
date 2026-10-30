@@ -10,9 +10,11 @@ import { TicketsModule } from './tickets/tickets.module.js';
 import { DeliveryModule } from './delivery/delivery.module.js';
 import { RuntimeModule } from './runtime/runtime.module.js';
 import { OperationsModule } from './operations/operations.module.js';
+import { ImportsModule } from './imports/imports.module.js';
 
 @Module({
   imports: [
+    ImportsModule,
     RuntimeModule,
     OperationsModule,
     DatabaseModule,

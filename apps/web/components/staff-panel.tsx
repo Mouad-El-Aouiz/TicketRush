@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback, type FormEvent } from "react";
 import { api, type User, type Event, type Page } from "@ticketrush/api-client";
+import CsvImport from "./csv-import";
 
 export default function StaffPanel({ user }: { user: User }) {
   const [events, setEvents] = useState<Event[]>([]);
@@ -112,6 +113,7 @@ export default function StaffPanel({ user }: { user: User }) {
       )}
       {user.role === "ORGANISATEUR" && (
         <>
+          <CsvImport onImported={load} />
           <div className="staff-grid">
             <form className="panel" onSubmit={(e) => void create(e)}>
               <h2>Publier un événement</h2>
