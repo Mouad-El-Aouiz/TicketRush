@@ -20,6 +20,7 @@ import { mkdir, rename, access } from 'node:fs/promises';
 import { finished } from 'node:stream/promises';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
+import { randomUUID } from 'node:crypto';
 import { CurrentUser, type Actor, Roles } from '../auth/auth.module.js';
 import { BodySchema, uuid } from '../common/http.js';
 import { Database } from '../database/database.module.js';
@@ -61,7 +62,8 @@ export class TicketsService {
       }
       const qr = await QRCode.toBuffer(ticket.code, { width: 260, margin: 2 });
       const doc = new PDFDocument({ size: 'A4', margin: 54 });
-      const file = createWriteStream(`${path}.tmp`);
+      const temporary = `${path}.${randomUUID()}.tmp`;
+      const file = createWriteStream(temporary);
       doc.pipe(file);
       doc.fontSize(28).text('TicketRush');
       doc.moveDown().fontSize(22).text(order.hold.category.event.title);
@@ -75,7 +77,7 @@ export class TicketsService {
         .text('Valid for one admission. Keep this ticket private.');
       doc.end();
       await finished(file);
-      await rename(`${path}.tmp`, path);
+      await rename(temporary, path);
       await this.db.ticket.update({
         where: { id: ticket.id },
         data: { pdfReady: true },

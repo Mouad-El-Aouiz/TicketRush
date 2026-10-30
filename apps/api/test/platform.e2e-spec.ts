@@ -52,6 +52,11 @@ describe('Platform authorization and validation', () => {
     secondToken = (await account('ORGANISATEUR')).token;
   });
   afterAll(async () => {
+    if (eventId)
+      await db.event.update({
+        where: { id: eventId },
+        data: { status: 'WITHDRAWN' },
+      });
     await app.close();
   });
 

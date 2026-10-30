@@ -13,13 +13,17 @@ import { z } from 'zod';
 import { CurrentUser, type Actor, Roles } from '../auth/auth.module.js';
 import { BodySchema, pageSchema, uuid } from '../common/http.js';
 import { Database } from '../database/database.module.js';
+import { Runtime } from '../runtime/runtime.module.js';
 
 @ApiTags('Administration')
 @ApiBearerAuth()
 @Roles('ADMIN')
 @Controller('admin')
 class AdminController {
-  constructor(private readonly db: Database) {}
+  constructor(
+    private readonly db: Database,
+    private readonly runtime: Runtime,
+  ) {}
   @Get('users') users(
     @Query(new BodySchema(pageSchema)) q: z.infer<typeof pageSchema>,
   ) {
@@ -77,7 +81,7 @@ class AdminController {
     )
     body: { reason: string },
   ) {
-    return this.db.$transaction(async (tx) => {
+    const withdrawn = await this.db.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT id FROM events WHERE id = ${id}::uuid FOR UPDATE`;
       const event = await tx.event.update({
         where: { id },
@@ -93,6 +97,8 @@ class AdminController {
       });
       return event;
     });
+    await this.runtime.invalidate();
+    return withdrawn;
   }
 }
 @Module({ controllers: [AdminController] })

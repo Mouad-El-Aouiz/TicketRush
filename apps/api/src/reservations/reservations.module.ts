@@ -16,6 +16,7 @@ import { BodySchema, uuid } from '../common/http.js';
 import { Database } from '../database/database.module.js';
 import { EventsModule, EventsService } from '../events/events.module.js';
 import type { Prisma } from '../generated/prisma/client.js';
+import { Runtime } from '../runtime/runtime.module.js';
 
 const holdSchema = z
   .object({ categoryId: z.uuid(), quantity: z.number().int().min(1).max(20) })
@@ -113,6 +114,7 @@ class ReservationsController {
   constructor(
     private readonly reservations: ReservationsService,
     private readonly db: Database,
+    private readonly runtime: Runtime,
   ) {}
   @Roles('CLIENT')
   @Post()
@@ -120,6 +122,13 @@ class ReservationsController {
     @CurrentUser() user: Actor,
     @Body(new BodySchema(holdSchema)) body: z.infer<typeof holdSchema>,
   ) {
+    return this.reserveProtected(user, body);
+  }
+  private async reserveProtected(
+    user: Actor,
+    body: z.infer<typeof holdSchema>,
+  ) {
+    await this.runtime.limit(`reserve:${user.id}`, 60);
     return this.reservations.reserve(user.id, body);
   }
   @Get() list(@CurrentUser() user: Actor) {

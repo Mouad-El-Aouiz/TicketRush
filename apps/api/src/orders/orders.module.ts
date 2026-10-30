@@ -27,6 +27,7 @@ import { CurrentUser, type Actor, Public, Roles } from '../auth/auth.module.js';
 import { BodySchema, uuid } from '../common/http.js';
 import { Database } from '../database/database.module.js';
 import { environment } from '../config/environment.js';
+import { ResilientHttp } from '../common/resilient-http.js';
 import {
   ReservationsModule,
   ReservationsService,
@@ -216,6 +217,7 @@ export class OrdersService {
 @ApiBearerAuth()
 @Controller()
 class OrdersController {
+  private readonly provider = new ResilientHttp();
   constructor(
     private readonly orders: OrdersService,
     private readonly db: Database,
@@ -284,7 +286,7 @@ class OrdersController {
     body: { status: 'SUCCEEDED' | 'FAILED' },
   ) {
     const payment = await this.orders.initiate(id, user.id);
-    const response = await fetch(
+    const response = await this.provider.request(
       `${environment().PAYMENT_PROVIDER_URL}/simulate`,
       {
         method: 'POST',
