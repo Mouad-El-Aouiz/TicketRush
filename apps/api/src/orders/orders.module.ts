@@ -23,6 +23,7 @@ import {
   randomUUID,
 } from 'node:crypto';
 import { z } from 'zod';
+import { messageContext } from '../common/context.js';
 import { CurrentUser, type Actor, Public, Roles } from '../auth/auth.module.js';
 import { BodySchema, uuid } from '../common/http.js';
 import { Database } from '../database/database.module.js';
@@ -203,7 +204,7 @@ export class OrdersService {
           data: {
             aggregateId: order.id,
             type: 'ORDER_PAID',
-            payload: { orderId: order.id },
+            payload: { orderId: order.id, ...messageContext() },
           },
         });
         return { received: true };
@@ -293,6 +294,7 @@ class OrdersController {
         headers: {
           'content-type': 'application/json',
           'x-provider-key': environment().PAYMENT_SECRET,
+          'x-correlation-id': messageContext().correlationId,
         },
         body: JSON.stringify({
           orderId: id,

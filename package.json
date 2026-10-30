@@ -13,7 +13,7 @@
     "local:start": "node scripts/start-local.mjs",
     "local:setup": "node scripts/init-env.mjs && docker compose up -d --wait && pnpm --filter @ticketrush/api setup:local && pnpm --filter @ticketrush/api db:generate && pnpm --filter @ticketrush/api db:migrate && pnpm --filter @ticketrush/api db:seed",
     "format:check": "pnpm --filter @ticketrush/api format:check",
-    "test": "pnpm --filter @ticketrush/api test",
+    "test": "pnpm -r --if-present test",
     "test:e2e": "pnpm --filter @ticketrush/api test:e2e"
   },
   "engines": {

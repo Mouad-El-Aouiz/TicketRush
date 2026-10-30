@@ -1,0 +1,28 @@
+{
+  "name": "@ticketrush/notifications",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --config ../api/eslint.config.mjs src --max-warnings=0",
+    "test": "vitest run",
+    "test:integration": "vitest run --config vitest.config.integration.ts",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.10.0",
+    "@ticketrush/contracts": "workspace:*",
+    "amqplib": "^2.2.0",
+    "dotenv": "18.0.9",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.8",
+    "@types/node": "^26.0.0",
+    "eslint": "10.13.0",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.2"
+  }
+}

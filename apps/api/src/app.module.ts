@@ -11,9 +11,11 @@ import { DeliveryModule } from './delivery/delivery.module.js';
 import { RuntimeModule } from './runtime/runtime.module.js';
 import { OperationsModule } from './operations/operations.module.js';
 import { ImportsModule } from './imports/imports.module.js';
+import { NotificationsModule } from './notifications/notifications.module.js';
 
 @Module({
   imports: [
+    NotificationsModule,
     ImportsModule,
     RuntimeModule,
     OperationsModule,

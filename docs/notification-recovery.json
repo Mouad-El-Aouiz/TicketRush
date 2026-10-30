@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "scenario": "notification consumer stopped during purchase",
+  "coreCatalogAndReadiness": 200,
+  "purchaseAndPdfWhileStopped": "passed",
+  "queuedMessages": 1,
+  "consumersWhileStopped": 0,
+  "notificationsAfterRestart": "one per order, including order created before restart",
+  "recoveryMs": 1801,
+  "recordedAt": "2026-10-30T11:15:04.489Z"
+}

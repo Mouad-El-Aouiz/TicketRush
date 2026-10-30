@@ -39,6 +39,8 @@ if (process.argv[2] === "--cleanup") {
   process.exit(0);
 }
 let event;
+let testedOrderId;
+const checkNotifications=!process.argv.includes('--skip-notifications');
 try {
   event = await call("/events", organizer, {
     title: `Docker smoke ${randomUUID().slice(0, 8)}`,
@@ -74,6 +76,7 @@ try {
     { "idempotency-key": key },
   );
   assert.equal(order.id, replay.id);
+  testedOrderId=order.id;
   await call(`/orders/${order.id}/simulate-payment`, customer, {
     status: "SUCCEEDED",
   });
@@ -112,6 +115,11 @@ try {
     signal: AbortSignal.timeout(10000),
   });
   assert.equal(duplicate.status, 409);
+  if(checkNotifications){
+    let notices=[];
+    for(let i=0;i<20;i++){notices=await call('/notifications',customer);if(notices.some(n=>n.orderId===order.id))break;await new Promise(resolve=>setTimeout(resolve,1000));}
+    assert.equal(notices.filter(n=>n.orderId===order.id).length,1);
+  }
 } finally {
   if (event)
     await call(`/admin/events/${event.id}/withdraw`, admin, {
@@ -122,6 +130,7 @@ console.log(
   JSON.stringify(
     {
       status: "passed",
+      orderId:testedOrderId,
       checks: [
         "publish",
         "reserve",
@@ -130,6 +139,7 @@ console.log(
         "async PDF delivery",
         "authorized PDF download",
         "single-use scan",
+        ...(checkNotifications?['notification inbox']:[]),
         "fixture withdrawn",
       ],
     },

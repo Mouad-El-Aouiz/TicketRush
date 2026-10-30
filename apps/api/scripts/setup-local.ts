@@ -41,6 +41,12 @@ values.DATABASE_CONTAINER_URL=applicationUrl.toString();
 const adminUrl=new URL(process.env.DATABASE_ADMIN_URL||admin);
 adminUrl.hostname='postgres'; adminUrl.port='5432';
 values.DATABASE_ADMIN_CONTAINER_URL=adminUrl.toString();
+if(!process.env.NOTIFICATIONS_SERVICE_KEY)values.NOTIFICATIONS_SERVICE_KEY=randomBytes(32).toString('hex');
+if(!process.env.RABBITMQ_PASSWORD)throw new Error('Run scripts/init-env.mjs to initialize RabbitMQ');
+if(!process.env.NOTIFICATIONS_BROKER_URL)values.NOTIFICATIONS_BROKER_URL=`amqp://${encodeURIComponent(process.env.RABBITMQ_USER??'ticketrush')}:${encodeURIComponent(process.env.RABBITMQ_PASSWORD)}@127.0.0.1:5672`;
+if(!process.env.NOTIFICATIONS_URL)values.NOTIFICATIONS_URL='http://127.0.0.1:4100';
+const brokerUrl=new URL(process.env.NOTIFICATIONS_BROKER_URL||values.NOTIFICATIONS_BROKER_URL);
+brokerUrl.hostname='rabbitmq';brokerUrl.port='5672';values.NOTIFICATIONS_BROKER_CONTAINER_URL=brokerUrl.toString();
 let updated = existing;
 for (const [key, value] of Object.entries(values)) {
   const line = new RegExp(`^${key}=.*$`, 'm');

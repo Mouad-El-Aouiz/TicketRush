@@ -39,6 +39,7 @@
     "@opentelemetry/sdk-node": "^0.300.0",
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
+    "@ticketrush/contracts": "workspace:*",
     "amqplib": "^2.2.0",
     "argon2": "^0.45.1",
     "bullmq": "^6.5.1",

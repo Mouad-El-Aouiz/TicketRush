@@ -6,6 +6,8 @@ import { randomUUID } from 'node:crypto';
 import { AppModule } from '../src/app.module.js';
 import { configure } from '../src/common/application.js';
 import { Runtime } from '../src/runtime/runtime.module.js';
+import { Notifications } from '../src/notifications/notifications.module.js';
+import { Database } from '../src/database/database.module.js';
 describe('Local operations on Redis and PostgreSQL', () => {
   let app: INestApplication<App>;
   let runtime: Runtime;
@@ -55,5 +57,30 @@ describe('Local operations on Redis and PostgreSQL', () => {
     expect((await runtime.queue(event, first)).position).toBe(1);
     await runtime.leave(event, first);
     expect((await runtime.queue(event, second)).position).toBe(1);
+  });
+  it('records one stable notification outbox event when fulfillment is replayed', async () => {
+    const previous = process.env.NODE_ENV;
+    const orderId = randomUUID();
+    const userId = randomUUID();
+    const db = app.get(Database);
+    process.env.NODE_ENV = 'development';
+    try {
+      const notifications = app.get(Notifications);
+      await notifications.ready(orderId, userId, 2);
+      const first = await db.outbox.findFirstOrThrow({
+        where: { aggregateId: orderId, type: 'TICKETS_READY' },
+      });
+      await notifications.ready(orderId, userId, 2);
+      const rows = await db.outbox.findMany({
+        where: { aggregateId: orderId, type: 'TICKETS_READY' },
+      });
+      expect(rows).toHaveLength(1);
+      expect(rows[0].payload).toEqual(first.payload);
+    } finally {
+      process.env.NODE_ENV = previous;
+      await db.outbox.deleteMany({
+        where: { aggregateId: orderId, type: 'TICKETS_READY' },
+      });
+    }
   });
 });
