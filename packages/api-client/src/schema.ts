@@ -580,6 +580,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/organizer/webhooks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["WebhooksController_list"];
+        put?: never;
+        post: operations["WebhooksController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/organizer/webhooks/{id}/rotate-secret": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["WebhooksController_rotate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/organizer/webhooks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["WebhooksController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -707,6 +755,35 @@ export interface components {
                 message: string;
             }[];
             errorsTruncated: boolean;
+        };
+        WebhookEndpoint: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uri */
+            url: string;
+            active: boolean;
+            createdAt: string;
+        };
+        WebhookEndpointList: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uri */
+            url: string;
+            active: boolean;
+            createdAt: string;
+        }[];
+        WebhookEndpointCreated: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uri */
+            url: string;
+            active: boolean;
+            createdAt: string;
+            secret: string;
+        };
+        WebhookDeleted: {
+            /** @constant */
+            deleted: true;
         };
     };
     responses: never;
@@ -1462,6 +1539,97 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    WebhooksController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookEndpointList"];
+                };
+            };
+        };
+    };
+    WebhooksController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** Format: uri */
+                    url: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookEndpointCreated"];
+                };
+            };
+        };
+    };
+    WebhooksController_rotate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookEndpointCreated"];
+                };
+            };
+        };
+    };
+    WebhooksController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookDeleted"];
+                };
             };
         };
     };

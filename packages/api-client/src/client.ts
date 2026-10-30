@@ -6,6 +6,9 @@ export type Event = components["schemas"]["Event"];
 export type Hold = components["schemas"]["Hold"];
 export type Ticket = components["schemas"]["Ticket"];
 export type Order = components["schemas"]["Order"];
+export type WebhookEndpoint = components["schemas"]["WebhookEndpoint"];
+export type WebhookEndpointCreated =
+  components["schemas"]["WebhookEndpointCreated"];
 export interface Page<T> {
   data: T[];
   total: number;
@@ -90,6 +93,31 @@ export async function downloadTicket(id: string) {
       response.status,
     );
   save(await response.blob(), id);
+}
+
+export function listOrganizerWebhooks() {
+  return api<WebhookEndpoint[]>("/organizer/webhooks");
+}
+
+export function createOrganizerWebhook(url: string) {
+  return api<WebhookEndpointCreated>("/organizer/webhooks", {
+    method: "POST",
+    body: JSON.stringify({ url }),
+  });
+}
+
+export function rotateOrganizerWebhookSecret(id: string) {
+  return api<WebhookEndpointCreated>(
+    `/organizer/webhooks/${encodeURIComponent(id)}/rotate-secret`,
+    { method: "POST" },
+  );
+}
+
+export function deleteOrganizerWebhook(id: string) {
+  return api<{ deleted: true }>(
+    `/organizer/webhooks/${encodeURIComponent(id)}`,
+    { method: "DELETE" },
+  );
 }
 async function downloadTicketOnce(id: string) {
   const res = await fetch(`/api/tickets/${encodeURIComponent(id)}/pdf`, {

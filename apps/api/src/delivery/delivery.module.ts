@@ -26,6 +26,10 @@ import {
 } from '@opentelemetry/api';
 import { randomUUID } from 'node:crypto';
 import { requestContext } from '../common/context.js';
+import {
+  WebhooksModule,
+  WebhooksService,
+} from '../webhooks/webhooks.module.js';
 
 @Injectable()
 export class DeliveryService implements OnModuleInit, OnModuleDestroy {
@@ -38,6 +42,7 @@ export class DeliveryService implements OnModuleInit, OnModuleDestroy {
     private readonly db: Database,
     private readonly tickets: TicketsService,
     private readonly reservations: ReservationsService,
+    private readonly webhooks: WebhooksService,
   ) {}
   onModuleInit() {
     if (environment().NODE_ENV === 'test') return;
@@ -53,6 +58,7 @@ export class DeliveryService implements OnModuleInit, OnModuleDestroy {
     this.worker = new Worker(
       'ticketrush-delivery',
       async (job) => {
+        if (job.name === 'webhook') return this.webhooks.deliver(job.data);
         if (job.name === 'expire') return this.reservations.expire();
         const body = z
           .object({
@@ -121,6 +127,36 @@ export class DeliveryService implements OnModuleInit, OnModuleDestroy {
         orderBy: { createdAt: 'asc' },
         take: 50,
       });
+      const orders = await this.db.order.findMany({
+        where: { id: { in: events.map((event) => event.aggregateId) } },
+        select: {
+          id: true,
+          hold: {
+            select: {
+              category: {
+                select: { event: { select: { organizerId: true } } },
+              },
+            },
+          },
+        },
+      });
+      const organizerByOrder = new Map<string, string>();
+      for (const order of orders)
+        organizerByOrder.set(order.id, order.hold.category.event.organizerId);
+      const organizerIds = [...new Set(organizerByOrder.values())];
+      const endpoints = organizerIds.length
+        ? await this.db.webhookEndpoint.findMany({
+            where: { organizerId: { in: organizerIds }, active: true },
+            select: { id: true, organizerId: true },
+          })
+        : [];
+      const endpointsByOrganizer = new Map<string, { id: string }[]>();
+      for (const endpoint of endpoints) {
+        const organizerEndpoints =
+          endpointsByOrganizer.get(endpoint.organizerId) ?? [];
+        organizerEndpoints.push({ id: endpoint.id });
+        endpointsByOrganizer.set(endpoint.organizerId, organizerEndpoints);
+      }
       for (const event of events) {
         await this.queue.add(
           'tickets',
@@ -140,6 +176,36 @@ export class DeliveryService implements OnModuleInit, OnModuleDestroy {
             removeOnComplete: { count: 5000 },
           },
         );
+        const organizerId = organizerByOrder.get(event.aggregateId);
+        if (organizerId) {
+          const organizerEndpoints =
+            endpointsByOrganizer.get(organizerId) ?? [];
+          const contextData = z
+            .object({
+              correlationId: z.uuid().optional(),
+              traceparent: z.string().max(200).optional(),
+            })
+            .parse(event.payload);
+          const payload = {
+            id: event.id,
+            type: 'order.paid',
+            occurredAt: event.createdAt.toISOString(),
+            data: { orderId: event.aggregateId },
+            ...contextData,
+          };
+          for (const endpoint of organizerEndpoints) {
+            await this.queue.add(
+              'webhook',
+              { eventId: event.id, endpointId: endpoint.id, payload },
+              {
+                jobId: `${event.id}-${endpoint.id}`,
+                attempts: 5,
+                backoff: { type: 'exponential', delay: 1000 },
+                removeOnComplete: { count: 5000 },
+              },
+            );
+          }
+        }
         await this.db.outbox.update({
           where: { id: event.id },
           data: { publishedAt: new Date() },
@@ -198,7 +264,7 @@ class JobsController {
   }
 }
 @Module({
-  imports: [TicketsModule, ReservationsModule],
+  imports: [TicketsModule, ReservationsModule, WebhooksModule],
   providers: [DeliveryService],
   controllers: [JobsController],
   exports: [DeliveryService],

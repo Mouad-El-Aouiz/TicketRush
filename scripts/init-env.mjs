@@ -12,6 +12,7 @@ for (const key of [
   "POSTGRES_PASSWORD",
   "REDIS_PASSWORD",
   "RABBITMQ_PASSWORD",
+  "WEBHOOK_ENCRYPTION_KEY",
 ]) {
   const pattern = new RegExp(`^${key}=(.*)$`, "m");
   const value = text.match(pattern)?.[1]?.trim();

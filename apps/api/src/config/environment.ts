@@ -15,6 +15,7 @@ const schema = z
     DATABASE_URL: z.url(),
     JWT_SECRET: z.string().min(48),
     PAYMENT_SECRET: z.string().min(48),
+    WEBHOOK_ENCRYPTION_KEY: z.string().regex(/^[a-f0-9]{64}$/),
     WEB_ORIGIN: z.url().default('http://127.0.0.1:3001'),
     API_HOST: z.enum(['127.0.0.1', '0.0.0.0']).default('127.0.0.1'),
     PAYMENT_PROVIDER_URL: z.url().default('http://127.0.0.1:4000'),

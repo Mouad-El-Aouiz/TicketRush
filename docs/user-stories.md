@@ -196,6 +196,21 @@ Critères d'acceptation proposés :
 
 Phase : 1 pour les accès et le statut ; cohérence à compléter en 2–3. Compétences : exigences métier, RBAC, traçabilité, gestion des états.
 
+## US-14 — Envoyer des webhooks signés aux organisateurs
+
+En tant qu'organisateur, je veux recevoir les confirmations de paiement sur une URL que je contrôle afin de mettre à jour mes systèmes sans consulter TicketRush en boucle.
+
+Critères d'acceptation :
+- Seul l'organisateur authentifié peut créer, lister, révoquer ou renouveler ses propres endpoints.
+- La création et le renouvellement retournent le secret une seule fois ; la base ne stocke que sa forme chiffrée.
+- Seules les URLs HTTPS sur le port 443 dont toutes les adresses résolues sont publiques sont acceptées.
+- La résolution DNS est contrôlée lors de la déclaration et juste avant l'envoi ; la connexion est épinglée à l'adresse vérifiée.
+- Les redirections HTTP ne sont jamais suivies.
+- `order.paid` est livré de façon asynchrone, avec identifiant d'événement stable, signature HMAC du corps et horodatage.
+- Les réponses hors 2xx déclenchent les reprises bornées avec backoff, puis la file d'échec existante.
+
+Phase : 5. Compétences : intégration HTTP, SSRF, DNS, HMAC, secrets, jobs asynchrones, retries et contrôle d'accès aux objets.
+
 ## Validation et découpage
 
 Ces stories représentent des résultats métier ; elles seront découpées en tâches techniques courtes avant implémentation. Les scénarios de panne, concurrence et rejeu fourniront les preuves de validation adaptées. Une story comportant une règle encore ouverte ne passe pas en implémentation avant résolution de cette règle.

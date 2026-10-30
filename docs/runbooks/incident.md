@@ -22,6 +22,10 @@ Un hold non payé expire après 10 minutes. Le calcul du stock ignore immédiate
 
 Vérifier la commande payée, puis l'outbox et la queue. L'API administrateur `/api/admin/jobs` donne les compteurs ; `/api/admin/jobs/dead-letter` montre les échecs épuisés. Après résolution de la cause, le retry est disponible par identifiant. Les traitements sont idempotents ; ne pas créer manuellement un second billet.
 
+## Webhook organisateur
+
+Une cible doit être HTTPS publique sur le port 443 ; les adresses internes sont refusées à l'inscription et à chaque livraison. Vérifier le statut du job dans la file d'échec et le domaine destinataire, sans tenter de contourner la validation DNS. Si un secret est perdu ou divulgué, renouveler l'endpoint et mettre à jour le destinataire. Le secret n'est pas relisible dans l'API; il faut le sauvegarder à sa création. Conserver `WEBHOOK_ENCRYPTION_KEY` : changer cette clé sans ré-enregistrer les endpoints rend leurs secrets chiffrés illisibles.
+
 ## Secrets et données
 
 Ne pas partager de sortie de `docker inspect`, de configuration Compose résolue ou de `.env`. Les journaux ne sont pas une sauvegarde. Conserver ensemble les sauvegardes PostgreSQL et les PDF privés avant toute opération de restauration. Aucune commande de suppression des volumes n'est nécessaire au redémarrage normal.

@@ -14,6 +14,7 @@ import { AuthService } from '../src/auth/auth.module.js';
 import { environment } from '../src/config/environment.js';
 import { Queue } from 'bullmq';
 import { DeliveryService } from '../src/delivery/delivery.module.js';
+import { z } from 'zod';
 
 describe('Commerce invariants on real PostgreSQL', () => {
   let app: INestApplication<App>;
@@ -23,11 +24,16 @@ describe('Commerce invariants on real PostgreSQL', () => {
   let tickets: TicketsService;
   let userId: string;
   let otherId: string;
+  let organizerId: string;
+  let otherOrganizerId: string;
   let controllerId: string;
   let token: string;
   let otherToken: string;
+  let organizerToken: string;
+  let otherOrganizerToken: string;
   let eventId: string;
   let categoryId: string;
+  let webhookEndpointId: string | undefined;
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
@@ -49,6 +55,16 @@ describe('Commerce invariants on real PostgreSQL', () => {
         role: 'ORGANISATEUR',
       },
     });
+    organizerId = organizer.id;
+    otherOrganizerId = (
+      await db.user.create({
+        data: {
+          email: `organizer-${randomUUID()}@example.com`,
+          passwordHash,
+          role: 'ORGANISATEUR',
+        },
+      })
+    ).id;
     userId = (
       await db.user.create({
         data: { email: `buyer-${randomUUID()}@example.com`, passwordHash },
@@ -70,6 +86,10 @@ describe('Commerce invariants on real PostgreSQL', () => {
     ).id;
     token = (await app.get(AuthService).issue(userId)).accessToken;
     otherToken = (await app.get(AuthService).issue(otherId)).accessToken;
+    organizerToken = (await app.get(AuthService).issue(organizerId))
+      .accessToken;
+    otherOrganizerToken = (await app.get(AuthService).issue(otherOrganizerId))
+      .accessToken;
     const event = await db.event.create({
       data: {
         organizerId: organizer.id,
@@ -89,6 +109,8 @@ describe('Commerce invariants on real PostgreSQL', () => {
     await db.assignment.create({ data: { eventId, userId: controllerId } });
   });
   afterAll(async () => {
+    if (webhookEndpointId)
+      await db.webhookEndpoint.deleteMany({ where: { id: webhookEndpointId } });
     if (eventId)
       await db.event.update({
         where: { id: eventId },
@@ -183,6 +205,121 @@ describe('Commerce invariants on real PostgreSQL', () => {
     await expect(orders.create(otherId, hold.id, randomUUID())).rejects.toThrow(
       'not found',
     );
+  });
+  it('stores organizer webhook secrets encrypted and returns them only on creation or rotation', async () => {
+    await request(app.getHttpServer())
+      .post('/api/organizer/webhooks')
+      .auth(token, { type: 'bearer' })
+      .send({ url: 'https://8.8.8.8/ticketrush' })
+      .expect(403);
+
+    const created = await request(app.getHttpServer())
+      .post('/api/organizer/webhooks')
+      .auth(organizerToken, { type: 'bearer' })
+      .send({ url: 'https://8.8.8.8/ticketrush' })
+      .expect(201);
+    const endpointSchema = z.object({
+      id: z.uuid(),
+      url: z.url(),
+      secret: z.string(),
+    });
+    const createdEndpoint = endpointSchema.parse(created.body as unknown);
+    webhookEndpointId = createdEndpoint.id;
+    expect(createdEndpoint.secret).toMatch(/^[A-Za-z0-9_-]{43}$/);
+    expect(created.body).not.toHaveProperty('secretCiphertext');
+
+    const listed = await request(app.getHttpServer())
+      .get('/api/organizer/webhooks')
+      .auth(organizerToken, { type: 'bearer' })
+      .expect(200);
+    const listedEndpoints = z
+      .array(z.record(z.string(), z.unknown()))
+      .parse(listed.body as unknown);
+    expect(listedEndpoints).toHaveLength(1);
+    expect(listedEndpoints[0]).not.toHaveProperty('secret');
+    expect(listedEndpoints[0]).not.toHaveProperty('secretCiphertext');
+
+    await request(app.getHttpServer())
+      .post(`/api/organizer/webhooks/${createdEndpoint.id}/rotate-secret`)
+      .auth(otherOrganizerToken, { type: 'bearer' })
+      .expect(404);
+    const rotated = await request(app.getHttpServer())
+      .post(`/api/organizer/webhooks/${createdEndpoint.id}/rotate-secret`)
+      .auth(organizerToken, { type: 'bearer' })
+      .expect(201);
+    const rotatedEndpoint = endpointSchema.parse(rotated.body as unknown);
+    expect(rotatedEndpoint.secret).not.toBe(createdEndpoint.secret);
+    expect(rotatedEndpoint.url).toBe(createdEndpoint.url);
+
+    await request(app.getHttpServer())
+      .post('/api/organizer/webhooks')
+      .auth(organizerToken, { type: 'bearer' })
+      .send({ url: 'http://127.0.0.1/metadata' })
+      .expect(400);
+
+    const hold = await holds.reserve(userId, { categoryId, quantity: 1 });
+    const order = await orders.create(userId, hold.id, randomUUID());
+    const payment = await orders.initiate(order.id, userId);
+    const paidRaw = Buffer.from(
+      JSON.stringify({
+        id: randomUUID(),
+        orderId: order.id,
+        providerRef: payment.providerRef,
+        amountCents: payment.amountCents,
+        status: 'SUCCEEDED',
+        timestamp: Date.now(),
+      }),
+    );
+    await orders.receive(
+      paidRaw,
+      createHmac('sha256', environment().PAYMENT_SECRET)
+        .update(paidRaw)
+        .digest('hex'),
+    );
+    const event = await db.outbox.findFirstOrThrow({
+      where: { aggregateId: order.id, type: 'ORDER_PAID' },
+    });
+    const delivery = app.get(DeliveryService);
+    const deliveryState = delivery as unknown as {
+      queue?: { add: (name: string, data: unknown) => Promise<object> };
+      dispatching: boolean;
+    };
+    const queued: { name: string; data: unknown }[] = [];
+    deliveryState.queue = {
+      add: (name, data) => {
+        queued.push({ name, data });
+        return Promise.resolve({});
+      },
+    };
+    await delivery.dispatch();
+    deliveryState.queue = undefined;
+    const webhookJobs = queued
+      .filter((job) => job.name === 'webhook')
+      .map((job) =>
+        z
+          .object({
+            eventId: z.uuid(),
+            endpointId: z.uuid(),
+            payload: z.record(z.string(), z.unknown()),
+          })
+          .parse(job.data),
+      );
+    const webhookData = webhookJobs.find((job) => job.eventId === event.id);
+    expect(webhookData).toBeDefined();
+    expect(webhookData).toMatchObject({
+      eventId: event.id,
+      endpointId: createdEndpoint.id,
+      payload: {
+        id: event.id,
+        type: 'order.paid',
+        data: { orderId: order.id },
+      },
+    });
+
+    await request(app.getHttpServer())
+      .delete(`/api/organizer/webhooks/${createdEndpoint.id}`)
+      .auth(organizerToken, { type: 'bearer' })
+      .expect(200);
   });
   it('verifies HMAC, handles replay and produces exactly one ticket per purchased place', async () => {
     const hold = await holds.reserve(userId, { categoryId, quantity: 2 });

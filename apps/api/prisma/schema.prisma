@@ -9,17 +9,18 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(uuid()) @db.Uuid
-  email         String         @unique
+  id            String            @id @default(uuid()) @db.Uuid
+  email         String            @unique
   passwordHash  String
-  role          String         @default("CLIENT")
-  createdAt     DateTime       @default(now()) @db.Timestamptz
+  role          String            @default("CLIENT")
+  createdAt     DateTime          @default(now()) @db.Timestamptz
   sessions      Session[]
   events        Event[]
   holds         Hold[]
   orders        Order[]
   assignments   Assignment[]
   notifications Notification[]
+  webhooks      WebhookEndpoint[]
 
   @@map("users")
 }
@@ -185,4 +186,17 @@ model Notification {
 
   @@index([userId, createdAt])
   @@map("notifications")
+}
+
+model WebhookEndpoint {
+  id               String   @id @default(uuid()) @db.Uuid
+  organizerId      String   @db.Uuid
+  organizer        User     @relation(fields: [organizerId], references: [id])
+  url              String
+  secretCiphertext String
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now()) @db.Timestamptz
+
+  @@index([organizerId, active])
+  @@map("webhook_endpoints")
 }

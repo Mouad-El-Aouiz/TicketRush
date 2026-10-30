@@ -87,6 +87,28 @@ try {
       ),
       errorsTruncated: z.boolean(),
     }),
+    WebhookEndpoint: z.object({
+      id,
+      url: z.url(),
+      active: z.boolean(),
+      createdAt: date,
+    }),
+    WebhookEndpointList: z.array(
+      z.object({
+        id,
+        url: z.url(),
+        active: z.boolean(),
+        createdAt: date,
+      }),
+    ),
+    WebhookEndpointCreated: z.object({
+      id,
+      url: z.url(),
+      active: z.boolean(),
+      createdAt: date,
+      secret: z.string(),
+    }),
+    WebhookDeleted: z.object({ deleted: z.literal(true) }),
   };
   const schemas = Object.fromEntries(
     Object.entries(definitions).map(([name, schema]) => {
@@ -104,6 +126,14 @@ try {
     '/api/auth/refresh': { post: 'Tokens' },
     '/api/orders/{id}': { get: 'Order' },
     '/api/imports/events': { post: 'CsvImportReport' },
+    '/api/organizer/webhooks': {
+      get: 'WebhookEndpointList',
+      post: 'WebhookEndpointCreated',
+    },
+    '/api/organizer/webhooks/{id}/rotate-secret': {
+      post: 'WebhookEndpointCreated',
+    },
+    '/api/organizer/webhooks/{id}': { delete: 'WebhookDeleted' },
   };
   for (const [path, methods] of Object.entries(responses))
     for (const [method, name] of Object.entries(methods)) {
@@ -130,6 +160,27 @@ try {
         },
       };
   }
+  const createWebhook = document.paths['/api/organizer/webhooks']?.post;
+  if (createWebhook)
+    createWebhook.requestBody = {
+      required: true,
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            additionalProperties: false,
+            required: ['url'],
+            properties: {
+              url: {
+                type: 'string',
+                format: 'uri',
+                pattern: '^https://[^/?#@]+(?::443)?(?:/[^?#]*)?$',
+              },
+            },
+          },
+        },
+      },
+    };
   const directory = fileURLToPath(
     new URL('../../../packages/api-client/', import.meta.url),
   );
