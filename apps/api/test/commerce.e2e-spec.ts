@@ -328,7 +328,11 @@ describe('Commerce invariants on real PostgreSQL', () => {
       expect((await queue.getJob(job.id!))?.attemptsMade).toBe(2);
       expect(await dead.getJob(job.id!)).toBeTruthy();
       await delivery.dispatch();
-      expect(await db.outbox.count({ where: { publishedAt: null } })).toBe(0);
+      expect(
+        await db.outbox.count({
+          where: { publishedAt: null, type: 'ORDER_PAID' },
+        }),
+      ).toBe(0);
       await (await dead.getJob(job.id!))?.remove();
       await job.remove();
     } finally {

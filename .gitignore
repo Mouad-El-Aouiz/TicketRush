@@ -15,5 +15,6 @@ Thumbs.db
 tmp/
 apps/api/src/generated/
 apps/api/storage/
+apps/notifications/storage/
 playwright-report/
 test-results/

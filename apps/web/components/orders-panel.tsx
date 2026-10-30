@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { api, downloadTicket, type Order } from "@ticketrush/api-client";
 import { money } from "./event-card";
+import NotificationsPanel from "./notifications-panel";
 export default function OrdersPanel() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [error, setError] = useState("");
@@ -42,6 +43,7 @@ export default function OrdersPanel() {
   }
   return (
     <section className="dashboard">
+      <NotificationsPanel />
       <p className="eyebrow">VOS SOUVENIRS COMMENCENT ICI</p>
       <h1>Mes billets.</h1>
       <p className="muted">

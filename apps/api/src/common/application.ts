@@ -9,6 +9,8 @@ import { Metrics } from '../operations/operations.module.js';
 import { Runtime } from '../runtime/runtime.module.js';
 import { pinoHttp } from 'pino-http';
 import { context, trace } from '@opentelemetry/api';
+import { requestContext } from './context.js';
+import { z } from 'zod';
 
 export function configure<T extends INestApplication>(app: T): T {
   app.setGlobalPrefix('api');
@@ -16,8 +18,10 @@ export function configure<T extends INestApplication>(app: T): T {
   app.use(cookieParser());
   app.enableCors({ origin: environment().WEB_ORIGIN, credentials: true });
   app.use((_req: Request, res: Response, next: NextFunction) => {
-    res.setHeader('x-correlation-id', randomUUID());
-    next();
+    const incoming = z.uuid().safeParse(_req.headers['x-correlation-id']);
+    const correlationId = incoming.success ? incoming.data : randomUUID();
+    res.setHeader('x-correlation-id', correlationId);
+    requestContext.run({ correlationId }, next);
   });
   const metrics = app.get(Metrics);
   const runtime = app.get(Runtime);

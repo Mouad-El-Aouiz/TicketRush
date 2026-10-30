@@ -1,8 +1,27 @@
-import { readFile,writeFile,access } from 'node:fs/promises';
-import { randomBytes } from 'node:crypto';
-const file=new URL('../.env',import.meta.url);
-try{await access(file);console.log('Existing local .env retained.');}catch{
- let text=await readFile(new URL('../.env.example',import.meta.url),'utf8');
- text=text.replace(/^POSTGRES_PASSWORD=.*$/m,`POSTGRES_PASSWORD=${process.env.POSTGRES_PASSWORD??randomBytes(32).toString('hex')}`).replace(/^REDIS_PASSWORD=.*$/m,`REDIS_PASSWORD=${randomBytes(32).toString('hex')}`);
- await writeFile(file,text,{flag:'wx'});console.log('Local .env initialized without displaying secrets.');
+import { readFile, writeFile, access } from "node:fs/promises";
+import { randomBytes } from "node:crypto";
+const file = new URL("../.env", import.meta.url);
+let text;
+try {
+  await access(file);
+  text = await readFile(file, "utf8");
+} catch {
+  text = await readFile(new URL("../.env.example", import.meta.url), "utf8");
 }
+for (const key of [
+  "POSTGRES_PASSWORD",
+  "REDIS_PASSWORD",
+  "RABBITMQ_PASSWORD",
+]) {
+  const pattern = new RegExp(`^${key}=(.*)$`, "m");
+  const value = text.match(pattern)?.[1]?.trim();
+  if (value) continue;
+  const line = `${key}=${process.env[key] ?? randomBytes(32).toString("hex")}`;
+  text = pattern.test(text)
+    ? text.replace(pattern, line)
+    : `${text}\n${line}\n`;
+}
+await writeFile(file, text);
+console.log(
+  "Local secrets initialized; existing values retained and not displayed.",
+);

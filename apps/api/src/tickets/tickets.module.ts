@@ -26,6 +26,7 @@ import { BodySchema, uuid } from '../common/http.js';
 import { Database } from '../database/database.module.js';
 import { OrdersModule, OrdersService } from '../orders/orders.module.js';
 import { EventsModule, EventsService } from '../events/events.module.js';
+import { Notifications } from '../notifications/notifications.module.js';
 
 export const ticketDirectory = fileURLToPath(
   new URL('../../storage/tickets', import.meta.url),
@@ -37,6 +38,7 @@ export class TicketsService {
     private readonly db: Database,
     private readonly orders: OrdersService,
     private readonly events: EventsService,
+    private readonly notifications: Notifications,
   ) {}
   async fulfill(orderId: string) {
     const order = await this.orders.fulfillment(orderId);
@@ -83,15 +85,7 @@ export class TicketsService {
         data: { pdfReady: true },
       });
     }
-    await this.db.notification.upsert({
-      where: { orderId },
-      create: {
-        orderId,
-        userId: order.userId,
-        message: 'Your tickets are ready. Download them from your orders.',
-      },
-      update: {},
-    });
+    await this.notifications.ready(orderId, order.userId, tickets.length);
     return { count: tickets.length };
   }
   async owned(id: string, userId: string) {
@@ -130,6 +124,7 @@ class TicketsController {
   constructor(
     private readonly tickets: TicketsService,
     private readonly db: Database,
+    private readonly notificationsService: Notifications,
   ) {}
   @Get('tickets/:id/pdf')
   async pdf(
@@ -157,11 +152,7 @@ class TicketsController {
     return this.tickets.scan(body.eventId, body.code, user.id);
   }
   @Get('notifications') notifications(@CurrentUser() user: Actor) {
-    return this.db.notification.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: 'desc' },
-      take: 50,
-    });
+    return this.notificationsService.list(user.id);
   }
   @Roles('CONTROLEUR') @Get('controller/events') assignments(
     @CurrentUser() user: Actor,

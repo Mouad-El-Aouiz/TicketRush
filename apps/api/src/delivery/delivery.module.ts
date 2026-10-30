@@ -18,6 +18,14 @@ import {
   ReservationsService,
 } from '../reservations/reservations.module.js';
 import { Roles } from '../auth/auth.module.js';
+import {
+  context,
+  propagation,
+  trace,
+  SpanStatusCode,
+} from '@opentelemetry/api';
+import { randomUUID } from 'node:crypto';
+import { requestContext } from '../common/context.js';
 
 @Injectable()
 export class DeliveryService implements OnModuleInit, OnModuleDestroy {
@@ -46,8 +54,39 @@ export class DeliveryService implements OnModuleInit, OnModuleDestroy {
       'ticketrush-delivery',
       async (job) => {
         if (job.name === 'expire') return this.reservations.expire();
-        const body = z.object({ orderId: z.uuid() }).parse(job.data);
-        return this.tickets.fulfill(body.orderId);
+        const body = z
+          .object({
+            orderId: z.uuid(),
+            correlationId: z.uuid().optional(),
+            traceparent: z.string().max(200).optional(),
+          })
+          .parse(job.data);
+        return requestContext.run(
+          { correlationId: body.correlationId ?? randomUUID() },
+          () =>
+            context.with(
+              propagation.extract(
+                context.active(),
+                body.traceparent ? { traceparent: body.traceparent } : {},
+              ),
+              () =>
+                trace
+                  .getTracer('ticketrush-delivery')
+                  .startActiveSpan('tickets.fulfill', async (span) => {
+                    try {
+                      return await this.tickets.fulfill(body.orderId);
+                    } catch (error) {
+                      span.setStatus({
+                        code: SpanStatusCode.ERROR,
+                        message: 'Ticket fulfillment failed',
+                      });
+                      throw error;
+                    } finally {
+                      span.end();
+                    }
+                  }),
+            ),
+        );
       },
       { connection, concurrency: 2 },
     );
@@ -85,7 +124,15 @@ export class DeliveryService implements OnModuleInit, OnModuleDestroy {
       for (const event of events) {
         await this.queue.add(
           'tickets',
-          { orderId: event.aggregateId },
+          {
+            orderId: event.aggregateId,
+            ...z
+              .object({
+                correlationId: z.uuid().optional(),
+                traceparent: z.string().max(200).optional(),
+              })
+              .parse(event.payload),
+          },
           {
             jobId: event.id,
             attempts: 5,

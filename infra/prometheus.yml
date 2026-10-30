@@ -5,3 +5,6 @@ scrape_configs:
     metrics_path: /api/ops/metrics
     static_configs:
       - targets: ["api:3000", "api-replica:3000"]
+  - job_name: notifications
+    static_configs:
+      - targets: ["notifications:4100"]

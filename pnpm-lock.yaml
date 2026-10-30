@@ -43,6 +43,9 @@ importers:
       '@prisma/client':
         specifier: 7.10.1
         version: 7.10.1(prisma@7.10.1(@types/node@26.6.6)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.5)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@6.0.3))(typescript@6.0.3)
+      '@ticketrush/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       amqplib:
         specifier: ^2.2.0
         version: 2.2.0
@@ -173,6 +176,40 @@ importers:
 
   apps/fake-payment: {}
 
+  apps/notifications:
+    dependencies:
+      '@opentelemetry/api':
+        specifier: ^1.10.0
+        version: 1.10.0
+      '@ticketrush/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      amqplib:
+        specifier: ^2.2.0
+        version: 2.2.0
+      dotenv:
+        specifier: 18.0.9
+        version: 18.0.9
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@types/amqplib':
+        specifier: ^0.10.8
+        version: 0.10.8
+      '@types/node':
+        specifier: ^26.0.0
+        version: 26.6.6
+      eslint:
+        specifier: 10.13.0
+        version: 10.13.0(jiti@2.7.0)
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.2
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@26.6.6)(@vitest/coverage-v8@4.1.12)(vite@8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
+
   apps/web:
     dependencies:
       '@ticketrush/api-client':
@@ -227,6 +264,16 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+
+  packages/contracts:
+    dependencies:
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.3
 
 packages:
 

@@ -11,10 +11,13 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json ./apps/api/package.json
 COPY apps/web/package.json ./apps/web/package.json
 COPY apps/fake-payment/package.json ./apps/fake-payment/package.json
+COPY apps/notifications/package.json ./apps/notifications/package.json
 COPY packages/api-client/package.json ./packages/api-client/package.json
+COPY packages/contracts ./packages/contracts
 RUN --mount=type=cache,id=ticketrush-pnpm,target=/pnpm/store pnpm install --frozen-lockfile --store-dir /pnpm/store
 COPY . .
 RUN pnpm --filter @ticketrush/api db:generate && pnpm --filter @ticketrush/api build
+RUN pnpm --filter @ticketrush/notifications build
 RUN pnpm --filter @ticketrush/web build
 
 FROM base AS api
@@ -41,3 +44,12 @@ USER node
 ENV FAKE_PAYMENT_HOST=0.0.0.0
 EXPOSE 4000
 CMD ["node", "server.mjs"]
+
+FROM api AS notifications
+USER root
+RUN mkdir -p /app/apps/notifications/storage && chown node:node /app/apps/notifications/storage
+USER node
+WORKDIR /app/apps/notifications
+ENV OTEL_SERVICE_NAME=ticketrush-notifications
+EXPOSE 4100
+CMD ["node","--import","../api/telemetry.mjs","dist/server.js"]
