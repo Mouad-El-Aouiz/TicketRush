@@ -121,7 +121,8 @@ Critères d'acceptation :
 - Une redirection ou une déclaration du client ne suffit pas à marquer la commande comme payée.
 - Une confirmation valide traitée avant expiration convertit la réservation en vente une seule fois.
 - À expiration ou après, une confirmation ne génère aucun billet et déclenche une annulation ou un remboursement simulé traçable.
-- Un paiement échoué ne délivre aucun billet ; les places restent soumises à l'expiration de la réservation.
+- Un webhook de refus libère les places et clôt la commande dans la même transaction ; une répétition ne libère pas le stock deux fois.
+- Une réussite reçue après le refus est remboursée en simulation et ne délivre aucun billet.
 
 Proposition à confirmer : l'heure de référence est celle du serveur lors de la transition transactionnelle vers l'état payé, et non l'heure annoncée par le fournisseur.
 

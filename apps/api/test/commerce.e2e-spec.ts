@@ -267,6 +267,61 @@ describe('Commerce invariants on real PostgreSQL', () => {
     ).toBe('REFUNDED');
     expect(await db.ticket.count({ where: { orderId: order.id } })).toBe(0);
   });
+  it('compensates a failed payment once and refunds a late success', async () => {
+    const availableBefore = (await holds.availability(categoryId)).available;
+    const hold = await holds.reserve(userId, { categoryId, quantity: 1 });
+    const order = await orders.create(userId, hold.id, randomUUID());
+    const payment = await orders.initiate(order.id, userId);
+    const failedPayload = {
+      id: randomUUID(),
+      orderId: order.id,
+      providerRef: payment.providerRef,
+      amountCents: payment.amountCents,
+      status: 'FAILED',
+      timestamp: Date.now(),
+    };
+    const failedRaw = Buffer.from(JSON.stringify(failedPayload));
+    const sign = (raw: Buffer) =>
+      createHmac('sha256', environment().PAYMENT_SECRET)
+        .update(raw)
+        .digest('hex');
+
+    await orders.receive(failedRaw, sign(failedRaw));
+    expect(
+      (await db.hold.findUniqueOrThrow({ where: { id: hold.id } })).status,
+    ).toBe('EXPIRED');
+    expect(
+      (await db.order.findUniqueOrThrow({ where: { id: order.id } })).status,
+    ).toBe('EXPIRED');
+    expect(
+      (await db.payment.findUniqueOrThrow({ where: { orderId: order.id } }))
+        .status,
+    ).toBe('FAILED');
+    expect((await holds.availability(categoryId)).available).toBe(
+      availableBefore,
+    );
+    expect(await orders.receive(failedRaw, sign(failedRaw))).toEqual({
+      received: true,
+      duplicate: true,
+    });
+
+    const lateSuccess = Buffer.from(
+      JSON.stringify({
+        ...failedPayload,
+        id: randomUUID(),
+        status: 'SUCCEEDED',
+      }),
+    );
+    await orders.receive(lateSuccess, sign(lateSuccess));
+    expect(
+      (await db.payment.findUniqueOrThrow({ where: { orderId: order.id } }))
+        .status,
+    ).toBe('REFUNDED');
+    expect(await db.ticket.count({ where: { orderId: order.id } })).toBe(0);
+    expect((await holds.availability(categoryId)).available).toBe(
+      availableBefore,
+    );
+  });
   it('demonstrates a PostgreSQL deadlock in an isolated fixture', async () => {
     const second = await db.category.create({
       data: { eventId, name: 'Deadlock fixture', capacity: 1, priceCents: 1 },

@@ -178,6 +178,14 @@ export class OrdersService {
             where: { id: payment.id },
             data: { status: 'FAILED' },
           });
+          await tx.hold.update({
+            where: { id: hold.id },
+            data: { status: 'EXPIRED' },
+          });
+          await tx.order.update({
+            where: { id: order.id },
+            data: { status: 'EXPIRED' },
+          });
           return { received: true };
         }
         if (hold.status !== 'ACTIVE' || hold.expiresAt <= new Date()) {
