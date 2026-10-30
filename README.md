@@ -69,7 +69,7 @@ Les traces restent sur cette machine. Voir [la procédure incident](docs/runbook
 
 Le MVP fonctionne avec une interface Next.js, NestJS, Prisma/PostgreSQL, Redis/BullMQ, paiement fictif, PDF/QR, administration et contrôle. Cache, SSE, protections de débit, retries/circuit breaker/bulkhead, images Docker et CI sont ajoutés dans le lot opérations.
 
-L’extraction notifications/RabbitMQ, l’import CSV, Google OAuth et l’assistant documentaire constituent les extensions suivantes ; ils ne sont pas annoncés comme terminés. Le dossier notifications reste réservé tant que son service n’est pas livré. Aucune transaction bancaire réelle, inscription à un cloud ou dépense n’est nécessaire au fonctionnement local.
+L’import CSV en flux est disponible dans l’espace organisateur : modèle téléchargeable, brouillons par lots et rapport d’erreurs ([guide](docs/csv-review.md)). L’extraction notifications/RabbitMQ, Google OAuth et l’assistant documentaire constituent les extensions suivantes ; ils ne sont pas annoncés comme terminés. Le dossier notifications reste réservé tant que son service n’est pas livré. Aucune transaction bancaire réelle, inscription à un cloud ou dépense n’est nécessaire au fonctionnement local.
 
 ## Documents
 
