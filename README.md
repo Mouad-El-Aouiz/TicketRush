@@ -71,7 +71,7 @@ Les traces restent sur cette machine. Voir [la procédure incident](docs/runbook
 
 Le MVP fonctionne avec une interface Next.js, NestJS, Prisma/PostgreSQL, Redis/BullMQ, paiement fictif, PDF/QR, administration et contrôle. Cache, SSE, protections de débit, retries/circuit breaker/bulkhead, images Docker et CI sont ajoutés dans le lot opérations.
 
-L’import CSV en flux est disponible dans l’espace organisateur : modèle téléchargeable, brouillons par lots et rapport d’erreurs ([guide](docs/csv-review.md)). Le service notifications/RabbitMQ et la compensation des paiements refusés sont livrés. Les organisateurs peuvent aussi gérer leurs webhooks signés via l'API documentée dans Swagger (`/api/docs`) ; les secrets sont chiffrés et les destinations privées bloquées. L'authentification Google est optionnelle et documentée dans [ADR 0009](docs/adr/0009-google-oidc.md) ; l’assistant documentaire reste à réaliser. Aucune transaction bancaire réelle, inscription à un cloud ou dépense n'est nécessaire au fonctionnement local.
+L’import CSV en flux est disponible dans l’espace organisateur : modèle téléchargeable, brouillons par lots et rapport d’erreurs ([guide](docs/csv-review.md)). Le service notifications/RabbitMQ et la compensation des paiements refusés sont livrés. Les organisateurs peuvent aussi gérer leurs webhooks signés via l'API documentée dans Swagger (`/api/docs`) ; les secrets sont chiffrés et les destinations privées bloquées. La connexion Google est facultative ([ADR 0009](docs/adr/0009-google-oidc.md)); l'assistant documentaire RAG fonctionne avec des modèles Ollama locaux ([guide](docs/assistant-local.md), [ADR 0010](docs/adr/0010-local-document-assistant.md)). Aucune transaction bancaire réelle, inscription à un cloud ou dépense n'est nécessaire au fonctionnement local.
 
 ## Webhooks sortants
 
@@ -89,6 +89,9 @@ Les endpoints sortants doivent utiliser HTTPS sur le port 443 et résoudre uniqu
 - [Bilan concurrence, commandes, paiement et livraison](docs/phase-2-3-review.md)
 - [Bilan phase 5 — architecture distribuée et résilience](docs/phase-5-review.md)
 - [ADR 0009 — connexion Google](docs/adr/0009-google-oidc.md)
+- [Assistant documentaire local](docs/assistant-local.md)
+- [ADR 0010 — RAG local](docs/adr/0010-local-document-assistant.md)
+- [Bilan phase 7 — interface, identité, flux et IA](docs/phase-7-review.md)
 - [Bilan interface et vérification navigateur](docs/web-review.md)
 - [Guide API](apps/api/README.md)
 - [Guide interface](apps/web/README.md)

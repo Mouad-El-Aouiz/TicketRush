@@ -696,6 +696,31 @@ footer .brand {
   text-align: center;
   text-transform: uppercase;
 }
+.assistant-disabled {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--muted);
+}
+.assistant-answer {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.assistant-answer h3 {
+  font-size: 18px;
+}
+.assistant-answer ul {
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.assistant-suggestions {
+  margin-top: 15px;
+}
+.assistant-suggestions .text-button {
+  margin-top: 8px;
+}
 label {
   display: block;
   font-size: 12px;

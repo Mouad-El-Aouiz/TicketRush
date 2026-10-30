@@ -79,6 +79,13 @@ try {
     }),
     Tokens: z.object({ accessToken: z.string(), expiresIn: z.number() }),
     GoogleSignInStatus: z.object({ enabled: z.boolean() }),
+    AssistantStatus: z.object({ enabled: z.boolean() }),
+    AssistantQuestion: z.object({ question: z.string().min(3).max(500) }),
+    AssistantAnswer: z.object({
+      answer: z.string(),
+      citations: z.array(z.object({ sourceId: z.string(), title: z.string() })),
+      suggestedQuestions: z.array(z.string()),
+    }),
     CsvImportReport: z.object({
       rows: z.number().int(),
       imported: z.number().int(),
@@ -126,6 +133,8 @@ try {
     '/api/auth/register': { post: 'Tokens' },
     '/api/auth/refresh': { post: 'Tokens' },
     '/api/auth/google/status': { get: 'GoogleSignInStatus' },
+    '/api/assistant/status': { get: 'AssistantStatus' },
+    '/api/assistant/ask': { post: 'AssistantAnswer' },
     '/api/orders/{id}': { get: 'Order' },
     '/api/imports/events': { post: 'CsvImportReport' },
     '/api/organizer/webhooks': {
@@ -169,6 +178,16 @@ try {
         302: { description: 'Redirects to continue Google sign-in' },
       };
   }
+  const assistantQuestion = document.paths['/api/assistant/ask']?.post;
+  if (assistantQuestion)
+    assistantQuestion.requestBody = {
+      required: true,
+      content: {
+        'application/json': {
+          schema: { $ref: '#/components/schemas/AssistantQuestion' },
+        },
+      },
+    };
   const createWebhook = document.paths['/api/organizer/webhooks']?.post;
   if (createWebhook)
     createWebhook.requestBody = {

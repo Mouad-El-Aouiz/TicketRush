@@ -1,0 +1,20 @@
+services:
+  api:
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+  api-replica:
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+  ollama:
+    image: ollama/ollama:0.40.13
+    profiles: [ai]
+    volumes: [ollama_data:/root/.ollama]
+    healthcheck:
+      test: ["CMD", "ollama", "ps"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+volumes:
+  ollama_data:

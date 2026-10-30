@@ -29,6 +29,29 @@ const schema = z
       (value) => (value === '' ? undefined : value),
       z.url().optional(),
     ),
+    OLLAMA_BASE_URL: z.preprocess(
+      (value) => (value === '' ? undefined : value),
+      z
+        .url()
+        .refine(
+          (value) => ['http:', 'https:'].includes(new URL(value).protocol),
+          'Ollama must use HTTP or HTTPS',
+        )
+        .refine((value) => {
+          const hostname = new URL(value).hostname;
+          return [
+            'localhost',
+            '127.0.0.1',
+            '[::1]',
+            '::1',
+            'host.docker.internal',
+            'ollama',
+          ].includes(hostname);
+        }, 'Ollama must use a local host')
+        .optional(),
+    ),
+    OLLAMA_CHAT_MODEL: z.string().min(1).default('qwen3:4b'),
+    OLLAMA_EMBEDDING_MODEL: z.string().min(1).default('embeddinggemma'),
     API_HOST: z.enum(['127.0.0.1', '0.0.0.0']).default('127.0.0.1'),
     PAYMENT_PROVIDER_URL: z.url().default('http://127.0.0.1:4000'),
     REDIS_PASSWORD: z.string().min(1),

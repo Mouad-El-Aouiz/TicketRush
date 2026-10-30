@@ -66,6 +66,11 @@ export function configure<T extends INestApplication>(app: T): T {
         .limit(`auth:${req.socket.remoteAddress ?? 'local'}`, 30)
         .then(() => next())
         .catch(next);
+    } else if (req.method === 'POST' && req.path === '/api/assistant/ask') {
+      void runtime
+        .limit(`assistant:${req.socket.remoteAddress ?? 'local'}`, 10)
+        .then(() => next())
+        .catch(next);
     } else next();
   });
   app.useGlobalFilters(new Errors());

@@ -8,10 +8,13 @@ API NestJS modulaire en TypeScript strict et ESM. Elle utilise PostgreSQL/Prisma
 - `events`, `reservations`, `orders` : catalogue, holds, paiements et transitions idempotentes.
 - `tickets`, `delivery` : billets PDF/QR, outbox, BullMQ et scan à usage unique.
 - `notifications` : passerelle vers le service RabbitMQ et sa boîte de réception locale.
+- `assistant` : RAG local avec pgvector et Ollama facultatif, FAQ et événements publics.
 - `webhooks` : endpoints HTTPS signés des organisateurs; les secrets sont chiffrés avec `WEBHOOK_ENCRYPTION_KEY`.
 - `imports`, `runtime`, `operations` : import CSV en flux, Redis, santé, métriques et protections de débit.
 
 Swagger est accessible sous `/api/docs`. Les routes de webhook organisateur sont `POST` et `GET /api/organizer/webhooks`, `POST /api/organizer/webhooks/:id/rotate-secret` et `DELETE /api/organizer/webhooks/:id`. Le secret n'est renvoyé qu'à la création ou au renouvellement. Les URLs de destination doivent utiliser HTTPS/443 et résoudre exclusivement vers des IP publiques.
+
+Le service local d'assistant expose `GET /api/assistant/status` et `POST /api/assistant/ask`. Il reste désactivé sans `OLLAMA_BASE_URL`; voir [le guide local](../../docs/assistant-local.md).
 
 ## Configuration et commandes
 
