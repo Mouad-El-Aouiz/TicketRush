@@ -9,6 +9,8 @@
   "scripts": {
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
+    "db:seed": "tsx scripts/seed.ts",
+    "openapi": "tsx scripts/export-openapi.ts",
     "setup:local": "tsx scripts/setup-local.ts",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\" \"*.{json,mjs,ts}\"",
