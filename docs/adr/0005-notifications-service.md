@@ -24,6 +24,6 @@ Conserver uniquement BullMQ était plus simple, mais n’exerçait pas une front
 
 La disponibilité du broker et celle du consommateur sont observées séparément du cœur de la billetterie. Les messages sont persistants, les queues durables et les effets idempotents. Un broker local unique n’offre aucune haute disponibilité ; les sauvegardes de son volume et du fichier de boîte restent nécessaires. Une confirmation de publication n’est pas une confirmation de traitement par le consommateur.
 
-Les tests couvrent contrat, déduplication, persistance du fichier, arrêt/reprise du consommateur, retry retardé et dead-letter sur de vraies queues isolées. Ces tests utilisent un contrat partagé Zod ; ils ne constituent pas une intégration Pact.
+Les tests couvrent contrat, déduplication, persistance du fichier, arrêt/reprise du consommateur, retry retardé et dead-letter sur de vraies queues isolées. Le schéma Zod partagé valide le message RabbitMQ ; le contrat HTTP de lecture de la boîte de réception est vérifié par Pact (ADR 0008).
 
 Références : [confirmations et acknowledgements RabbitMQ](https://www.rabbitmq.com/docs/confirms), [API amqplib](https://amqp-node.github.io/amqplib/channel_api.html), [SQLite intégré à Node](https://nodejs.org/api/sqlite.html).

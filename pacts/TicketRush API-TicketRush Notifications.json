@@ -1,0 +1,83 @@
+{
+  "consumer": {
+    "name": "TicketRush API"
+  },
+  "interactions": [
+    {
+      "description": "a request for the authenticated user notification inbox",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "a user has a ready-ticket notification",
+          "params": {
+            "eventId": "35353535-3535-4353-a353-353535353535",
+            "orderId": "24242424-2424-4242-a242-242424242424",
+            "userId": "13131313-1313-4131-a131-131313131313"
+          }
+        }
+      ],
+      "request": {
+        "headers": {
+          "x-correlation-id": [
+            "46464646-4646-4464-a464-464646464646"
+          ],
+          "x-service-key": [
+            "pact-contract-test-service-key-not-a-secret"
+          ]
+        },
+        "method": "GET",
+        "path": "/internal/users/13131313-1313-4131-a131-131313131313/notifications"
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "createdAt": "2026-10-30T12:00:00.000Z",
+              "id": "35353535-3535-4353-a353-353535353535",
+              "message": "Your 1 ticket(s) are ready. Download them from your orders.",
+              "orderId": "24242424-2424-4242-a242-242424242424",
+              "userId": "13131313-1313-4131-a131-131313131313"
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$[0].createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ss.SSSX",
+                  "match": "datetime"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "17.1.4"
+    },
+    "pactRust": {
+      "ffi": "0.5.8",
+      "models": "1.3.16"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "TicketRush Notifications"
+  }
+}

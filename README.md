@@ -42,9 +42,11 @@ pnpm lint
 pnpm format:check
 pnpm test
 pnpm test:e2e
+pnpm --filter @ticketrush/api pact:consumer
+pnpm --filter @ticketrush/notifications pact:provider
 ```
 
-Les tests d’intégration utilisent de vrais PostgreSQL/Redis. GitHub Actions les exécute sur des services neufs et construit API/interface. Le scénario suivant vérifie réellement Nginx → API → fournisseur simulé → webhook → worker → PDF → contrôle, puis retire son événement temporaire :
+Les tests d’intégration utilisent de vrais PostgreSQL/Redis. Les commandes Pact s’exécutent dans cet ordre : le test API génère le contrat dans `pacts/`, puis le fournisseur Notifications vérifie ce fichier contre son vrai serveur HTTP et une boîte SQLite éphémère. GitHub Actions rejoue ces deux commandes sur chaque PR avant de construire l’API et l’interface. Le scénario suivant vérifie réellement Nginx → API → fournisseur simulé → webhook → worker → PDF → contrôle, puis retire son événement temporaire :
 
 ```powershell
 node --env-file=.env scripts/smoke-local.mjs
@@ -85,6 +87,7 @@ Les endpoints sortants doivent utiliser HTTPS sur le port 443 et résoudre uniqu
 - [ADR compensation et webhooks signés](docs/adr/0006-payment-failure-compensation.md)
 - [Webhooks sortants sécurisés](docs/adr/0007-secure-outgoing-webhooks.md)
 - [Bilan concurrence, commandes, paiement et livraison](docs/phase-2-3-review.md)
+- [Bilan phase 5 — architecture distribuée et résilience](docs/phase-5-review.md)
 - [Bilan interface et vérification navigateur](docs/web-review.md)
 - [Guide API](apps/api/README.md)
 - [Guide interface](apps/web/README.md)

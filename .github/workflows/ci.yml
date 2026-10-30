@@ -31,6 +31,8 @@ jobs:
       - run: pnpm --filter @ticketrush/api db:migrate
       - run: pnpm typecheck && pnpm lint && pnpm format:check
       - run: pnpm test && pnpm test:e2e
+      - run: pnpm --filter @ticketrush/api pact:consumer
+      - run: pnpm --filter @ticketrush/notifications pact:provider
       - run: pnpm --filter @ticketrush/notifications test:integration
       - run: pnpm --filter @ticketrush/web typecheck && pnpm --filter @ticketrush/web lint
       - run: pnpm build
