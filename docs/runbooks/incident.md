@@ -16,7 +16,7 @@ Relever l'en-tête `x-correlation-id` ou le champ `correlationId` de l'erreur, s
 
 Le circuit breaker refuse temporairement les nouveaux appels après plusieurs échecs. Vérifier d'abord l'état de la commande : une réponse HTTP perdue ne signifie pas que le paiement n'a pas été confirmé par webhook. Ne pas modifier directement le stock ou les billets en base.
 
-Un hold non payé expire après 10 minutes. Le calcul du stock ignore immédiatement les holds expirés ; le nettoyage asynchrone peut arriver ensuite. Une confirmation tardive reste remboursée en simulation et ne délivre aucun billet.
+Un hold non payé expire après 10 minutes. Le calcul du stock ignore immédiatement les holds expirés ; le nettoyage asynchrone peut arriver ensuite. Un webhook signé `FAILED` libère immédiatement le hold dans la même transaction qui clôt la commande et marque le paiement en échec. Une répétition du webhook ne libère pas le stock deux fois. Une confirmation tardive reste remboursée en simulation et ne délivre aucun billet.
 
 ## Billet en préparation
 
