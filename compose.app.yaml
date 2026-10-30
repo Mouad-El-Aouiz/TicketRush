@@ -1,0 +1,63 @@
+services:
+  migrate:
+    image: ticketrush-api:local
+    build: { context: ., target: api }
+    env_file: .env
+    environment:
+      DATABASE_ADMIN_URL: ${DATABASE_ADMIN_CONTAINER_URL:?Run setup:local first}
+    command: ["pnpm", "db:migrate"]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  api: &api
+    image: ticketrush-api:local
+    build: { context: ., target: api }
+    env_file: .env
+    environment:
+      DATABASE_URL: ${DATABASE_CONTAINER_URL:?Run setup:local first}
+      DATABASE_ADMIN_URL: ""
+      API_HOST: 0.0.0.0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      PAYMENT_PROVIDER_URL: http://fake-payment:4000
+      WEB_ORIGIN: http://127.0.0.1:8080
+      NODE_ENV: development
+    volumes: ["./apps/api/storage:/app/apps/api/storage"]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/ops/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+  api-replica:
+    <<: *api
+
+  fake-payment:
+    image: ticketrush-fake-payment:local
+    build: { context: ., target: fake-payment }
+    environment:
+      PAYMENT_SECRET: ${PAYMENT_SECRET:?Run setup:local first}
+      PAYMENT_CALLBACK_URL: http://api:3000/api/payments/webhook
+    restart: unless-stopped
+
+  web:
+    image: ticketrush-web:local
+    build: { context: ., target: web }
+    depends_on:
+      api: { condition: service_healthy }
+    restart: unless-stopped
+
+  proxy:
+    image: nginx:1.29-alpine
+    ports: ["127.0.0.1:8080:80"]
+    volumes: ["./infra/nginx.conf:/etc/nginx/conf.d/default.conf:ro"]
+    depends_on:
+      api: { condition: service_healthy }
+      api-replica: { condition: service_healthy }
+      web: { condition: service_started }
+    restart: unless-stopped
+

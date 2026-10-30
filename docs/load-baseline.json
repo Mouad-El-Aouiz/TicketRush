@@ -1,0 +1,9 @@
+{
+  "requests": 100,
+  "concurrency": 10,
+  "errors": 0,
+  "errorRate": 0,
+  "p95Ms": 120.43,
+  "requestsPerSecond": 156.52,
+  "elapsedMs": 639
+}

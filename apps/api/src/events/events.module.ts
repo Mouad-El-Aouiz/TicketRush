@@ -17,6 +17,7 @@ import { CurrentUser, type Actor, Public, Roles } from '../auth/auth.module.js';
 import { BodySchema, pageSchema, uuid } from '../common/http.js';
 import { Database } from '../database/database.module.js';
 import type { Prisma } from '../generated/prisma/client.js';
+import { Runtime } from '../runtime/runtime.module.js';
 
 const eventSchema = z
   .object({
@@ -111,11 +112,14 @@ class EventsController {
   constructor(
     private readonly db: Database,
     private readonly events: EventsService,
+    private readonly runtime: Runtime,
   ) {}
   @Public() @Get() list(
     @Query(new BodySchema(pageSchema)) query: z.infer<typeof pageSchema>,
   ) {
-    return this.events.list(query);
+    return this.runtime.cached(`list:${JSON.stringify(query)}`, () =>
+      this.events.list(query),
+    );
   }
   @Roles('ORGANISATEUR') @Get('mine') mine(
     @CurrentUser() actor: Actor,
@@ -124,7 +128,7 @@ class EventsController {
     return this.events.list(query, actor.id);
   }
   @Public() @Get(':id') detail(@Param('id', uuid) id: string) {
-    return this.events.detail(id);
+    return this.runtime.cached(`detail:${id}`, () => this.events.detail(id));
   }
   @Roles('ORGANISATEUR')
   @Post()
@@ -166,7 +170,7 @@ class EventsController {
   @Roles('ORGANISATEUR')
   @Post(':id/publish')
   async publish(@Param('id', uuid) id: string, @CurrentUser() actor: Actor) {
-    return this.db.$transaction(async (tx) => {
+    const published = await this.db.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT id FROM events WHERE id = ${id}::uuid FOR UPDATE`;
       const event = await tx.event.findFirst({
         where: { id, organizerId: actor.id },
@@ -181,6 +185,8 @@ class EventsController {
         throw new BadRequestException('Event is not publishable');
       return tx.event.update({ where: { id }, data: { status: 'PUBLISHED' } });
     });
+    await this.runtime.invalidate();
+    return published;
   }
   @Roles('ORGANISATEUR')
   @Post(':id/controllers')

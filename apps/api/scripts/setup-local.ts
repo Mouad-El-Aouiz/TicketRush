@@ -18,6 +18,7 @@ const values: Record<string,string> = {};
 if (!process.env.DATABASE_ADMIN_URL) values.DATABASE_ADMIN_URL = admin;
 if (!process.env.JWT_SECRET) values.JWT_SECRET = randomBytes(48).toString('hex');
 if (!process.env.PAYMENT_SECRET) values.PAYMENT_SECRET = randomBytes(48).toString('hex');
+if (!process.env.GRAFANA_PASSWORD) values.GRAFANA_PASSWORD = randomBytes(24).toString('hex');
 if (!process.env.DATABASE_URL) {
   const appPassword = randomBytes(32).toString('hex');
   const client = new Client({ connectionString: admin });
@@ -34,6 +35,12 @@ if (!process.env.DATABASE_URL) {
   } finally { await client.end(); }
   values.DATABASE_URL = `postgresql://ticketrush_app:${appPassword}@${host}:${port}/${db}`;
 }
+const applicationUrl=new URL(process.env.DATABASE_URL||values.DATABASE_URL);
+applicationUrl.hostname='postgres'; applicationUrl.port='5432';
+values.DATABASE_CONTAINER_URL=applicationUrl.toString();
+const adminUrl=new URL(process.env.DATABASE_ADMIN_URL||admin);
+adminUrl.hostname='postgres'; adminUrl.port='5432';
+values.DATABASE_ADMIN_CONTAINER_URL=adminUrl.toString();
 let updated = existing;
 for (const [key, value] of Object.entries(values)) {
   const line = new RegExp(`^${key}=.*$`, 'm');

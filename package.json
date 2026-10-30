@@ -5,9 +5,13 @@
   "packageManager": "pnpm@10.34.9",
   "scripts": {
     "dev": "pnpm --filter @ticketrush/api start:dev",
-    "build": "pnpm --filter @ticketrush/api build",
-    "typecheck": "pnpm --filter @ticketrush/api typecheck",
-    "lint": "pnpm --filter @ticketrush/api lint",
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "pnpm -r --if-present lint",
+    "web": "pnpm --filter @ticketrush/web dev",
+    "provider": "pnpm --filter @ticketrush/fake-payment start",
+    "local:start": "node scripts/start-local.mjs",
+    "local:setup": "node scripts/init-env.mjs && docker compose up -d --wait && pnpm --filter @ticketrush/api setup:local && pnpm --filter @ticketrush/api db:generate && pnpm --filter @ticketrush/api db:migrate && pnpm --filter @ticketrush/api db:seed",
     "format:check": "pnpm --filter @ticketrush/api format:check",
     "test": "pnpm --filter @ticketrush/api test",
     "test:e2e": "pnpm --filter @ticketrush/api test:e2e"

@@ -8,9 +8,13 @@ import { AdminModule } from './admin/admin.module.js';
 import { OrdersModule } from './orders/orders.module.js';
 import { TicketsModule } from './tickets/tickets.module.js';
 import { DeliveryModule } from './delivery/delivery.module.js';
+import { RuntimeModule } from './runtime/runtime.module.js';
+import { OperationsModule } from './operations/operations.module.js';
 
 @Module({
   imports: [
+    RuntimeModule,
+    OperationsModule,
     DatabaseModule,
     AuthModule,
     EventsModule,

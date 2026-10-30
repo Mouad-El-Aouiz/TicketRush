@@ -1,0 +1,41 @@
+name: Verify TicketRush
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26.13.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: node scripts/init-env.mjs
+      - run: docker compose up -d --wait --wait-timeout 120
+      - run: pnpm --filter @ticketrush/api setup:local
+      - run: pnpm --filter @ticketrush/api db:generate
+      - run: pnpm --filter @ticketrush/api db:migrate
+      - run: pnpm typecheck && pnpm lint && pnpm format:check
+      - run: pnpm test && pnpm test:e2e
+      - run: pnpm --filter @ticketrush/web typecheck && pnpm --filter @ticketrush/web lint
+      - run: pnpm build
+      - name: Show service state on failure
+        if: failure()
+        run: docker compose ps
+      - name: Stop test services
+        if: always()
+        run: docker compose down

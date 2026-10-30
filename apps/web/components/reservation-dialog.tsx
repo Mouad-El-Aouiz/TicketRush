@@ -21,6 +21,11 @@ export default function ReservationDialog({
   const [error, setError] = useState("");
   const [available, setAvailable] = useState<number | null>(null);
   const category = event.categories.find((c) => c.id === categoryId);
+  useEffect(()=>{
+    const stream=new EventSource(`/api/live/events/${event.id}`);
+    stream.onmessage=(message:MessageEvent<string>)=>{try{const data=JSON.parse(message.data) as {categoryId:string;available:number}[];const selected=data.find(item=>item.categoryId===categoryId);if(selected)setAvailable(selected.available);}catch{/* Retain the last confirmed availability on malformed updates. */}};
+    return()=>stream.close();
+  },[event.id,categoryId]);
   useEffect(() => {
     let active = true;
     void api<{ available: number }>(`/reservations/availability/${categoryId}`)

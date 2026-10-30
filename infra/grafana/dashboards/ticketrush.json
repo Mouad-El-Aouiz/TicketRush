@@ -1,0 +1,10 @@
+{
+  "title":"TicketRush — API", "uid":"ticketrush-api", "schemaVersion":39,"version":1,
+  "time":{"from":"now-1h","to":"now"},"refresh":"10s",
+  "panels":[
+    {"id":1,"type":"timeseries","title":"Requests / second","gridPos":{"x":0,"y":0,"w":12,"h":8},"datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"sum(rate(ticketrush_http_requests_total[1m]))","refId":"A"}]},
+    {"id":2,"type":"timeseries","title":"p95 HTTP latency (seconds)","gridPos":{"x":12,"y":0,"w":12,"h":8},"datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"histogram_quantile(0.95,sum by(le)(rate(ticketrush_http_duration_seconds_bucket[5m])))","refId":"A"}]},
+    {"id":3,"type":"timeseries","title":"HTTP server errors / second","gridPos":{"x":0,"y":8,"w":12,"h":8},"datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"sum(rate(ticketrush_http_requests_total{status=~\"5..\"}[1m]))","refId":"A"}]},
+    {"id":4,"type":"timeseries","title":"Process memory (bytes)","gridPos":{"x":12,"y":8,"w":12,"h":8},"datasource":{"type":"prometheus","uid":"prometheus"},"targets":[{"expr":"ticketrush_process_resident_memory_bytes","refId":"A"}]}
+  ]
+}

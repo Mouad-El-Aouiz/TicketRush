@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 10s
+scrape_configs:
+  - job_name: ticketrush
+    metrics_path: /api/ops/metrics
+    static_configs:
+      - targets: ["api:3000", "api-replica:3000"]
